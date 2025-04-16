@@ -31,6 +31,9 @@ ecgs = {
 
 # 🔑 Nome do cardiologista
 st.title("Classificador de Sinais ECG")
+if "mensagem" in st.session_state:
+    st.success(st.session_state["mensagem"])
+    del st.session_state["mensagem"]
 nome = st.text_input("Identifique-se:", max_chars=50)
 
 if nome:
@@ -52,9 +55,8 @@ if nome:
         def classificar(rotulo):
             agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             sheet.append_row([sinal_id, nome, rotulo, agora])
-            st.success(f"Sinal {sinal_id} classificado como '{rotulo}'!")
+            st.session_state["mensagem"] = f"Sinal {sinal_id} classificado como '{rotulo}'!"
             st.experimental_rerun()
-
         
         with col1:
             if st.button("✅ Normal"):
