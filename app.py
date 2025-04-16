@@ -5,7 +5,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
 
-# 🔐 Conexão com Google Sheets
+# Conectar à planilha
 def conectar_planilha():
     escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
@@ -16,14 +16,14 @@ def conectar_planilha():
 
 sheet = conectar_planilha()
 
-# 🔬 Sinais ECG (simulados)
+# Simular sinais
 ecgs = {
     101: [0.01, 0.03, 0.05, 0.02],
     102: [0.04, 0.02, 0.03, 0.01],
     103: [0.05, 0.06, 0.04, 0.03]
 }
 
-# 🧑‍⚕️ Nome do cardiologista
+# Nome do médico
 st.title("Classificador de Sinais ECG")
 nome = st.text_input("Identifique-se:", max_chars=50)
 
@@ -33,26 +33,29 @@ if nome:
     sinais_disponiveis = [k for k in ecgs if k not in ids_classificados]
 
     if sinais_disponiveis:
+        # Garantir que o estado está inicializado
+        if "rotulo_escolhido" not in st.session_state:
+            st.session_state.rotulo_escolhido = None
+
         sinal_id = sinais_disponiveis[0]
         st.subheader(f"Sinal ID: {sinal_id}")
         st.line_chart(ecgs[sinal_id])
 
-        st.write("Escolha a classificação:")
         rotulo = st.radio(
-            "Selecione o rótulo para o sinal",
+            "Classificação:",
             ["Normal", "Arritmia", "Fibrilação", "Outro"],
             index=None,
             key="rotulo_escolhido"
         )
 
         if st.button("➡️ Seguinte"):
-            if rotulo:
+            if st.session_state.rotulo_escolhido:
                 agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                sheet.append_row([sinal_id, nome, rotulo, agora])
-                st.success(f"Sinal {sinal_id} classificado como '{rotulo}'!")
-                st.session_state["rotulo_escolhido"] = None  # Reset da escolha
+                sheet.append_row([sinal_id, nome, st.session_state.rotulo_escolhido, agora])
+                # Reset do estado e forçar rerun
+                st.session_state.pop("rotulo_escolhido", None)
                 st.experimental_rerun()
             else:
-                st.warning("⚠️ Por favor, selecione uma classificação antes de continuar.")
+                st.warning("⚠️ Escolha uma classificação antes de continuar.")
     else:
-        st.info("🎉 Você já classificou todos os sinais disponíveis!")
+        st.info("🎉 Todos os sinais já foram classificados!")
