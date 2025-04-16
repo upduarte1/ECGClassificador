@@ -15,7 +15,6 @@ def connect_sheets():
     sinais_sheet = cliente.open("ECG Dados").sheet1  # ou o nome correto da aba
     return classificacoes_sheet, sinais_sheet
 
-
 # 📥 Carregar os sinais da planilha de sinais
 def carregar_sinais(sheet):
     registros = sheet.get_all_records()
@@ -45,7 +44,10 @@ if nome:
 
     total_sinais = len(ecgs)
     num_classificados = len(ids_classificados)
-    st.info(f"📊 Você já classificou {num_classificados} de {total_sinais} sinais.")
+    st.info(f"📊 Sinais classificados: {num_classificados} / {total_sinais}.")
+
+    progresso = num_classificados / total_sinais
+    st.progress(progresso)
             
     sinais_disponiveis = [k for k in ecgs if k not in ids_classificados]
 
