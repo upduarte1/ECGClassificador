@@ -3,11 +3,19 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
+import json
 
 # 🔐 Configurar acesso ao Google Sheets
 def conectar_planilha():
     escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credenciais = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", escopos)
+    
+    # Carregar as credenciais dos Secrets da Streamlit Cloud
+    credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+
+    # Criar as credenciais a partir do dicionário JSON
+    credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
+
+    # Autenticar e acessar a planilha
     cliente = gspread.authorize(credenciais)
     planilha = cliente.open("ECG Classificações")
     return planilha.sheet1
@@ -40,11 +48,12 @@ if nome:
         
         st.write("Classifique o sinal:")
         col1, col2, col3, col4 = st.columns(4)
+        
         def classificar(rotulo):
             agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             sheet.append_row([sinal_id, nome, rotulo, agora])
             st.success(f"Sinal {sinal_id} classificado como '{rotulo}'!")
-            st.rerun()
+            st.experimental_rerun()
 
         
         with col1:
