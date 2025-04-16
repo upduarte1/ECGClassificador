@@ -10,7 +10,8 @@ def conectar_planilha():
     escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     
     # Carregar as credenciais dos Secrets da Streamlit Cloud
-    credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+    credenciais = st.secrets["GOOGLE_CREDENTIALS"]
+
 
     # Criar as credenciais a partir do dicionário JSON
     credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
