@@ -3,16 +3,12 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
-import matplotlib.pyplot as plt
-import numpy as np
 
 # 👥 Usuários autorizados
 USUARIOS = {
     "joao": "1234",
     "maria": "abcd",
-    "luisa": "senha123",
-    "luis2a": "senha123",
-    "dudu": "32323"
+    "luisa": "senha123"
 }
 
 # 🔐 Estado de autenticação
@@ -95,29 +91,9 @@ else:
     if sinais_disponiveis:
         sinal_id = sinais_disponiveis[0]
         st.subheader(f"Sinal ID: {sinal_id}")
-
-        # 🔄 Exibir gráfico personalizado com matplotlib
-        def plot_ecg(ecg_signal):
-            # Gerando gráfico mais legível com matplotlib
-            plt.figure(figsize=(10, 6))
-            tempo = np.arange(len(ecg_signal))  # Eixo do tempo
-
-            plt.plot(tempo, ecg_signal, color="tab:blue", lw=2)  # Linha azul mais espessa
-            plt.title("Sinal ECG", fontsize=16, fontweight='bold')
-            plt.xlabel("Tempo", fontsize=12)
-            plt.ylabel("Amplitude", fontsize=12)
-            plt.grid(True, linestyle='--', alpha=0.6)
-            plt.axhline(y=0, color='black', linewidth=1)  # Linha no zero para referência
-            plt.xticks(fontsize=10)
-            plt.yticks(fontsize=10)
-
-            st.pyplot(plt)
-
-        # Chama a função para plotar o gráfico do sinal
-        plot_ecg(ecgs[sinal_id])
+        st.line_chart(ecgs[sinal_id])
 
         st.write("Classifique o sinal:")
-
         col1, col2, col3, col4 = st.columns(4)
 
         # 🔘 Funções de classificação
