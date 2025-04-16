@@ -23,6 +23,17 @@ ecgs = {
     103: [0.05, 0.06, 0.04, 0.03]
 }
 
+# Inicialização segura de estado
+if "rotulo_escolhido" not in st.session_state:
+    st.session_state.rotulo_escolhido = None
+if "deve_recarregar" not in st.session_state:
+    st.session_state.deve_recarregar = False
+
+# Trigger manual de recarregamento
+if st.session_state.deve_recarregar:
+    st.session_state.deve_recarregar = False
+    st.experimental_rerun()
+
 # Nome do médico
 st.title("Classificador de Sinais ECG")
 nome = st.text_input("Identifique-se:", max_chars=50)
@@ -33,15 +44,11 @@ if nome:
     sinais_disponiveis = [k for k in ecgs if k not in ids_classificados]
 
     if sinais_disponiveis:
-        # Garantir que o estado está inicializado
-        if "rotulo_escolhido" not in st.session_state:
-            st.session_state.rotulo_escolhido = None
-
         sinal_id = sinais_disponiveis[0]
         st.subheader(f"Sinal ID: {sinal_id}")
         st.line_chart(ecgs[sinal_id])
 
-        rotulo = st.radio(
+        st.radio(
             "Classificação:",
             ["Normal", "Arritmia", "Fibrilação", "Outro"],
             index=None,
@@ -52,9 +59,10 @@ if nome:
             if st.session_state.rotulo_escolhido:
                 agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 sheet.append_row([sinal_id, nome, st.session_state.rotulo_escolhido, agora])
-                # Reset do estado e forçar rerun
-                st.session_state.pop("rotulo_escolhido", None)
-                st.experimental_rerun()
+                # Reset para próxima iteração
+                st.session_state.rotulo_escolhido = None
+                st.session_state.deve_recarregar = True
+                st.stop()  # Impede que o rerun aconteça agora mesmo
             else:
                 st.warning("⚠️ Escolha uma classificação antes de continuar.")
     else:
