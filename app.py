@@ -82,7 +82,7 @@ if nome:
             st.write(f"Você selecionou: **{st.session_state.rotulo_temp}**")
             st.session_state.comentario_temp = st.text_input("Comentário (opcional):", value=st.session_state.comentario_temp)
             
-            if st.button("✅ Confirmar classificação"):
+            if st.button("Confirmar classificação"):
                 agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 sheet.append_row([
                     sinal_id,
