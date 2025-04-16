@@ -4,17 +4,20 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
 
+# 👥 Usuários autorizados
 USUARIOS = {
     "joao": "1234",
     "maria": "abcd",
     "luisa": "senha123"
 }
 
+# 🔐 Estado de autenticação
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
 if "usuario" not in st.session_state:
     st.session_state.usuario = ""
 
+# 🔑 Login
 if not st.session_state.autenticado:
     st.title("🔐 Login")
 
@@ -31,56 +34,52 @@ if not st.session_state.autenticado:
                 st.rerun()
             else:
                 st.error("Usuário ou senha incorretos.")
+
+# 🔁 App principal após login
 else:
     nome = st.session_state.usuario
-    st.sidebar.success(f"✅ Logado como: {nome}")
-    # 👉 Aqui segue o restante da lógica do seu app normalmente
+    nome_exibido = nome.title()
+    st.sidebar.success(f"✅ Logado como: {nome_exibido}")
+    st.title(f"Classificador de Sinais ECG - Bem-vindo(a), {nome_exibido}")
 
+    # 📂 Conectar às planilhas
+    def connect_sheets():
+        escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+        credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
+        cliente = gspread.authorize(credenciais)
 
-# 🔐 Conectar às duas planilhas separadas
-def connect_sheets():
-    escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
-    credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
-    cliente = gspread.authorize(credenciais)
-    
-    classificacoes_sheet = cliente.open("ECG Classificações").sheet1
-    sinais_sheet = cliente.open("ECG Dados").sheet1  # ou o nome correto da aba
-    return classificacoes_sheet, sinais_sheet
+        classificacoes_sheet = cliente.open("ECG Classificações").sheet1
+        sinais_sheet = cliente.open("ECG Dados").sheet1
+        return classificacoes_sheet, sinais_sheet
 
-# 📥 Carregar os sinais da planilha de sinais
-def carregar_sinais(sheet):
-    registros = sheet.get_all_records()
-    ecgs = {}
-    for linha in registros:
-        try:
-            signal_id = int(linha["signal_id"])
-            ecg_str = linha["ecg_signal"]
-            valores = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
-            ecgs[signal_id] = valores
-        except Exception as e:
-            st.warning(f"Erro ao processar sinal {linha}: {e}")
-    return ecgs
+    # 📥 Carregar sinais da planilha
+    def carregar_sinais(sheet):
+        registros = sheet.get_all_records()
+        ecgs = {}
+        for linha in registros:
+            try:
+                signal_id = int(linha["signal_id"])
+                ecg_str = linha["ecg_signal"]
+                valores = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
+                ecgs[signal_id] = valores
+            except Exception as e:
+                st.warning(f"Erro ao processar sinal {linha}: {e}")
+        return ecgs
 
-# 📡 Conectar às planilhas e carregar dados
-classificacoes_sheet, sinais_sheet = connect_sheets()
-ecgs = carregar_sinais(sinais_sheet)
+    # 🔄 Conectar e carregar dados
+    classificacoes_sheet, sinais_sheet = connect_sheets()
+    ecgs = carregar_sinais(sinais_sheet)
 
-# 🧠 App principal
-st.title("Classificador de Sinais ECG")
-nome = st.text_input("Introduza o seu nome:", max_chars=50)
-
-if nome:
+    # 📊 Progresso do usuário
     registros = classificacoes_sheet.get_all_records()
     ids_classificados = {r['signal_id'] for r in registros if r['cardiologista'] == nome}
 
     total_sinais = len(ecgs)
     num_classificados = len(ids_classificados)
-    st.info(f"📊 Sinais classificados: {num_classificados} / {total_sinais}.")
+    st.info(f"📈 Sinais classificados: {num_classificados} / {total_sinais}")
 
-    progresso = num_classificados / total_sinais
-    st.progress(progresso)
-            
+    # 📌 Exibir próximo sinal a classificar
     sinais_disponiveis = [k for k in ecgs if k not in ids_classificados]
 
     if sinais_disponiveis:
@@ -91,19 +90,14 @@ if nome:
         st.write("Classifique o sinal:")
         col1, col2, col3, col4 = st.columns(4)
 
-        def classificar(rotulo):
-            agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            classificacoes_sheet.append_row([sinal_id, nome, rotulo, agora])
-            st.success(f"Sinal {sinal_id} classificado como '{rotulo}'!")
-            st.rerun()
+        # 🔘 Funções de classificação
+        def selecionar_rotulo(rotulo):
+            st.session_state.rotulo_temp = rotulo
 
         if "rotulo_temp" not in st.session_state:
             st.session_state.rotulo_temp = None
         if "comentario_temp" not in st.session_state:
             st.session_state.comentario_temp = ""
-
-        def selecionar_rotulo(rotulo):
-            st.session_state.rotulo_temp = rotulo
 
         with col1:
             if st.button("⚠️ Fibrilhação"):
@@ -135,6 +129,5 @@ if nome:
                 st.session_state.rotulo_temp = None
                 st.session_state.comentario_temp = ""
                 st.rerun()
-
     else:
-        st.info("Você já classificou todos os sinais disponíveis! Obrigado!")
+        st.info("🎉 Você já classificou todos os sinais disponíveis! Obrigado!")
