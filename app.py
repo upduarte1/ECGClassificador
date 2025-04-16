@@ -11,9 +11,9 @@ USUARIOS = {
     "joao": "1234",
     "maria": "abcd",
     "luisa": "senha123",
+    "luis2a": "senha123",
     "dudu": "32323"
 }
-if usuario in USUARIOS and senha == USUARIOS[usuario]:
 
 # 🔐 Estado de autenticação
 if "autenticado" not in st.session_state:
