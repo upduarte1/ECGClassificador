@@ -15,7 +15,7 @@ def conectar_planilhas():
     classificacoes_sheet = cliente.open("ECG Classificações").sheet1
     
     # 🟩 Planilha de sinais (valores separados por vírgulas)
-    sinais_sheet = cliente.open("ECG Sinais").sheet1
+    sinais_sheet = cliente.open("ECG Dados").sheet1
 
     return classificacoes_sheet, sinais_sheet
 
