@@ -4,12 +4,11 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 
 # 🔐 Configurar acesso ao Google Sheets
+# Conectar à planilha
 def conectar_planilha():
     escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    
-    # Acessa as credenciais diretamente, sem o json.loads
-    credenciais = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["GOOGLE_CREDENTIALS"], escopos)
-    
+    credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+    credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
     cliente = gspread.authorize(credenciais)
     planilha = cliente.open("ECG Classificações")
     return planilha.sheet1
