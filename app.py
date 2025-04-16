@@ -2,7 +2,7 @@ import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
-
+import json
 # 🔐 Configurar acesso ao Google Sheets
 def conectar_planilha():
     escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
