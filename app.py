@@ -31,9 +31,6 @@ ecgs = {
 
 # 🔑 Nome do cardiologista
 st.title("Classificador de Sinais ECG")
-if "mensagem" in st.session_state:
-    st.success(st.session_state["mensagem"])
-    del st.session_state["mensagem"]
 nome = st.text_input("Identifique-se:", max_chars=50)
 
 if nome:
