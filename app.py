@@ -11,30 +11,27 @@ def conectar_planilhas():
     credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
     cliente = gspread.authorize(credenciais)
 
-    # 🟦 Planilha de classificações
     classificacoes_sheet = cliente.open("ECG Classificações").sheet1
-    
-    # 🟩 Planilha de sinais (valores separados por vírgulas)
-    sinais_sheet = cliente.open("ECG Dados").sheet1
-    ecgs = carregar_sinais(sinais_sheet)
-    st.write("Sinais carregados:", ecgs)
-    
-
+    sinais_sheet = cliente.open("ECG Sinais").sheet1  # ou outra aba específica se for diferente
     return classificacoes_sheet, sinais_sheet
 
+
 # 📥 Carregar os sinais da planilha de sinais
-def carregar_sinais(sheet_sinais):
-    linhas = sheet_sinais.get_all_values()
+def carregar_sinais(sheet):
+    linhas = sheet.get_all_values()
     ecgs = {}
     for linha in linhas:
+        if not linha or not linha[0].isdigit():
+            continue  # pula linhas vazias ou com headers
+
         try:
-            if linha and linha[0].isdigit():
-                signal_id = int(linha[0])
-                valores = list(map(int, linha[1:]))
-                ecgs[signal_id] = valores
+            sinal_id = int(linha[0])
+            valores = [int(x) for x in linha[1:] if x.strip() != ""]
+            ecgs[sinal_id] = valores
         except Exception as e:
-            st.warning(f"Erro ao processar linha: {linha} - {e}")
+            print(f"Erro ao processar linha {linha[0]}: {e}")
     return ecgs
+
 
 # 📡 Conectar às planilhas e carregar dados
 classificacoes_sheet, sinais_sheet = conectar_planilhas()
