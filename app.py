@@ -18,7 +18,6 @@ def connect_sheets():
 # 📥 Carregar os sinais da planilha de sinais
 def carregar_sinais(sheet):
     registros = sheet.get_all_records()
-    st.write("Registros brutos:", registros)
     ecgs = {}
     for linha in registros:
         try:
