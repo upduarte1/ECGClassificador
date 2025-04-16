@@ -49,13 +49,13 @@ if nome:
         st.write("Classifique o sinal:")
         col1, col2, col3, col4 = st.columns(4)
         
-        # Função para classificar
         def classificar(rotulo):
             agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             sheet.append_row([sinal_id, nome, rotulo, agora])
-            st.session_state["mensagem"] = f"Sinal {sinal_id} classificado como '{rotulo}'!"
+            st.success(f"Sinal {sinal_id} classificado como '{rotulo}'!")
+            st.experimental_rerun()
+
         
-        # Botões para classificação
         with col1:
             if st.button("✅ Normal"):
                 classificar("Normal")
@@ -68,9 +68,5 @@ if nome:
         with col4:
             if st.button("❓ Outro"):
                 classificar("Outro")
-        
-        # Exibir a mensagem de sucesso sem rerun
-        if "mensagem" in st.session_state:
-            st.success(st.session_state["mensagem"])
     else:
         st.info("🎉 Você já classificou todos os sinais disponíveis!")
