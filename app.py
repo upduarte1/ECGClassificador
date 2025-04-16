@@ -40,7 +40,7 @@ if not st.session_state.autenticado:
 else:
     nome = st.session_state.usuario
     nome_exibido = nome.title()
-    st.sidebar.success(f"Logged in as: {nome_exibido}")
+    st.sidebar.success(f"Bem vindo, Dr. {nome_exibido}")
 
     if st.sidebar.button("Logout"):
         st.session_state.autenticado = False
