@@ -5,7 +5,7 @@ from datetime import datetime
 import json
 
 # 🔐 Conectar às duas planilhas separadas
-def conectar_planilhas():
+def connect_sheets():
     escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
     credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
@@ -34,20 +34,21 @@ def carregar_sinais(sheet):
 
 
 # 📡 Conectar às planilhas e carregar dados
-classificacoes_sheet, sinais_sheet = conectar_planilhas()
+classificacoes_sheet, sinais_sheet = connect_sheets()
 ecgs = carregar_sinais(sinais_sheet)
-
-st.write("Sinais carregados:", ecgs)
-
 
 # 🧠 App principal
 st.title("Classificador de Sinais ECG")
-nome = st.text_input("Identifique-se:", max_chars=50)
+nome = st.text_input("Introduza o seu nome:", max_chars=50)
 
 if nome:
     registros = classificacoes_sheet.get_all_records()
     ids_classificados = {r['signal_id'] for r in registros if r['cardiologista'] == nome}
 
+    total_sinais = len(ecgs)
+    num_classificados = len(ids_classificados)
+    st.info(f"📊 Você já classificou {num_classificados} de {total_sinais} sinais."
+            
     sinais_disponiveis = [k for k in ecgs if k not in ids_classificados]
 
     if sinais_disponiveis:
@@ -76,10 +77,10 @@ if nome:
             if st.button("✅ Normal"):
                 selecionar_rotulo("Normal")
         with col2:
-            if st.button("⚠️ Arritmia"):
+            if st.button("⚠️ Fibrilhação"):
                 selecionar_rotulo("Arritmia")
         with col3:
-            if st.button("🔥 Fibrilação"):
+            if st.button("⚡ Ruidoso"):
                 selecionar_rotulo("Fibrilação")
         with col4:
             if st.button("❓ Outro"):
@@ -104,4 +105,4 @@ if nome:
                 st.rerun()
 
     else:
-        st.info("🎉 Você já classificou todos os sinais disponíveis!")
+        st.info("Você já classificou todos os sinais disponíveis! Obrigado!")
