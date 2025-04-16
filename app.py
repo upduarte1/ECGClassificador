@@ -20,7 +20,7 @@ if "usuario" not in st.session_state:
 
 # 🔑 Login
 if not st.session_state.autenticado:
-    st.title("🔐 Login")
+    st.title("Login")
 
     with st.form("login_form"):
         usuario = st.text_input("Usuário").strip().lower()
@@ -40,9 +40,9 @@ if not st.session_state.autenticado:
 else:
     nome = st.session_state.usuario
     nome_exibido = nome.title()
-    st.sidebar.success(f"✅ Logado como: {nome_exibido}")
+    st.sidebar.success(f"Logged in as: {nome_exibido}")
 
-    if st.sidebar.button("🔓 Logout"):
+    if st.sidebar.button("Logout"):
         st.session_state.autenticado = False
         st.session_state.usuario = ""
         st.rerun()
