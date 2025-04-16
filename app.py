@@ -53,17 +53,51 @@ if nome:
             st.success(f"Sinal {sinal_id} classificado como '{rotulo}'!")
             st.rerun()
         
-        with col1:
-            if st.button("✅ Normal"):
-                classificar("Normal")
-        with col2:
-            if st.button("⚠️ Arritmia"):
-                classificar("Arritmia")
-        with col3:
-            if st.button("🔥 Fibrilação"):
-                classificar("Fibrilação")
-        with col4:
-            if st.button("❓ Outro"):
-                classificar("Outro")
+        # Estado temporário: rótulo e comentário
+    if "rotulo_temp" not in st.session_state:
+        st.session_state.rotulo_temp = None
+    if "comentario_temp" not in st.session_state:
+        st.session_state.comentario_temp = ""
+    
+    # Função para registrar escolha temporária
+    def selecionar_rotulo(rotulo):
+        st.session_state.rotulo_temp = rotulo
+    
+    # Botões de escolha
+    with col1:
+        if st.button("✅ Normal"):
+            selecionar_rotulo("Normal")
+    with col2:
+        if st.button("⚠️ Arritmia"):
+            selecionar_rotulo("Arritmia")
+    with col3:
+        if st.button("🔥 Fibrilação"):
+            selecionar_rotulo("Fibrilação")
+    with col4:
+        if st.button("❓ Outro"):
+            selecionar_rotulo("Outro")
+    
+    # Se o médico escolheu um rótulo
+    if st.session_state.rotulo_temp:
+        st.write(f"Você selecionou: **{st.session_state.rotulo_temp}**")
+        st.session_state.comentario_temp = st.text_input("Comentário (opcional):", value=st.session_state.comentario_temp)
+        
+        if st.button("✅ Confirmar classificação"):
+            agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            sheet.append_row([
+                sinal_id,
+                nome,
+                st.session_state.rotulo_temp,
+                agora,
+                st.session_state.comentario_temp
+            ])
+            st.success(f"Sinal {sinal_id} classificado como '{st.session_state.rotulo_temp}'!")
+            
+            # Limpar variáveis temporárias
+            st.session_state.rotulo_temp = None
+            st.session_state.comentario_temp = ""
+            
+            st.rerun()
+
     else:
         st.info("🎉 Você já classificou todos os sinais disponíveis!")
