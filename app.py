@@ -39,11 +39,13 @@ if not st.session_state.autenticado:
 else:
     nome = st.session_state.usuario
     nome_exibido = nome.title()
-    st.sidebar.success("✅ Logado como: {nome_exibido}")
+    st.sidebar.success(f"✅ Logado como: {nome_exibido}")
+
     if st.sidebar.button("🔓 Logout"):
-    st.session_state.autenticado = False
-    st.session_state.usuario = ""
-    st.rerun()
+        st.session_state.autenticado = False
+        st.session_state.usuario = ""
+        st.rerun()
+
     st.title(f"Classificador de Sinais ECG")
 
     # 📂 Conectar às planilhas
