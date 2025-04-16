@@ -36,6 +36,9 @@ def carregar_sinais(sheet):
 classificacoes_sheet, sinais_sheet = conectar_planilhas()
 ecgs = carregar_sinais(sinais_sheet)
 
+st.write("Sinais carregados:", ecgs)
+
+
 # 🧠 App principal
 st.title("Classificador de Sinais ECG")
 nome = st.text_input("Identifique-se:", max_chars=50)
