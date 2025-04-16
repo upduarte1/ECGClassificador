@@ -47,7 +47,7 @@ if nome:
 
     total_sinais = len(ecgs)
     num_classificados = len(ids_classificados)
-    st.info(f"📊 Você já classificou {num_classificados} de {total_sinais} sinais."
+    st.info(f"📊 Você já classificou {num_classificados} de {total_sinais} sinais.")
             
     sinais_disponiveis = [k for k in ecgs if k not in ids_classificados]
 
