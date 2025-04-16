@@ -4,6 +4,39 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
 
+USUARIOS = {
+    "joao": "1234",
+    "maria": "abcd",
+    "luisa": "senha123"
+}
+
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
+if "usuario" not in st.session_state:
+    st.session_state.usuario = ""
+
+if not st.session_state.autenticado:
+    st.title("🔐 Login")
+
+    with st.form("login_form"):
+        usuario = st.text_input("Usuário").strip().lower()
+        senha = st.text_input("Senha", type="password")
+        submit = st.form_submit_button("Entrar")
+
+        if submit:
+            if usuario in USUARIOS and senha == USUARIOS[usuario]:
+                st.session_state.autenticado = True
+                st.session_state.usuario = usuario
+                st.success("Login realizado com sucesso!")
+                st.rerun()
+            else:
+                st.error("Usuário ou senha incorretos.")
+else:
+    nome = st.session_state.usuario
+    st.sidebar.success(f"✅ Logado como: {nome}")
+    # 👉 Aqui segue o restante da lógica do seu app normalmente
+
+
 # 🔐 Conectar às duas planilhas separadas
 def connect_sheets():
     escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
