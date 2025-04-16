@@ -10,7 +10,8 @@ import numpy as np
 USUARIOS = {
     "joao": "1234",
     "maria": "abcd",
-    "luisa": "senha123"
+    "luisa": "senha123",
+    "dudu": "32323"
 }
 
 # 🔐 Estado de autenticação
