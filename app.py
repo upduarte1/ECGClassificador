@@ -16,6 +16,9 @@ def conectar_planilhas():
     
     # 🟩 Planilha de sinais (valores separados por vírgulas)
     sinais_sheet = cliente.open("ECG Dados").sheet1
+    ecgs = carregar_sinais(sinais_sheet)
+    st.write("Sinais carregados:", ecgs)
+    
 
     return classificacoes_sheet, sinais_sheet
 
