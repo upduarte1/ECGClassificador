@@ -19,11 +19,12 @@ def conectar_planilhas():
 # 📥 Carregar os sinais da planilha de sinais
 def carregar_sinais(sheet):
     registros = sheet.get_all_records()
+    st.write("Registros brutos:", registros)
     ecgs = {}
     for linha in registros:
         try:
             signal_id = int(linha["signal_id"])
-            ecg_str = linha["ecg"]
+            ecg_str = linha["ecg_signal"]
             valores = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
             ecgs[signal_id] = valores
         except Exception as e:
