@@ -92,7 +92,22 @@ else:
     if sinais_disponiveis:
         sinal_id = sinais_disponiveis[0]
         st.subheader(f"Sinal ID: {sinal_id}")
-        st.line_chart(ecgs[sinal_id])
+        # st.line_chart(ecgs[sinal_id])
+         # Preparar os dados para o gráfico altair
+        df = pd.DataFrame({
+            'Amostra': list(range(len(ecgs[sinal_id]))),
+            'ECG': ecgs[sinal_id]
+        })
+
+        # Criar gráfico com altair, com controle sobre a espessura da linha
+        chart = alt.Chart(df).mark_line(size=1).encode(
+            x='Amostra',
+            y='ECG'
+        ).properties(
+            title=f"Sinal ECG ID {sinal_id}"
+        )
+
+        st.altair_chart(chart, use_container_width=True)
 
         st.write("Classifique o sinal:")
         col1, col2, col3, col4 = st.columns(4)
