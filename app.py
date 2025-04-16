@@ -10,27 +10,26 @@ def conectar_planilhas():
     credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
     credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
     cliente = gspread.authorize(credenciais)
-
+    
     classificacoes_sheet = cliente.open("ECG Classificações").sheet1
-    sinais_sheet = cliente.open("ECG Dados").sheet1  # ou outra aba específica se for diferente
+    sinais_sheet = cliente.open("ECG Dados").sheet1  # ou o nome correto da aba
     return classificacoes_sheet, sinais_sheet
 
 
 # 📥 Carregar os sinais da planilha de sinais
 def carregar_sinais(sheet):
-    linhas = sheet.get_all_values()
+    registros = sheet.get_all_records()
     ecgs = {}
-    for linha in linhas:
-        if not linha or not linha[0].isdigit():
-            continue  # pula linhas vazias ou com headers
-
+    for linha in registros:
         try:
-            sinal_id = int(linha[0])
-            valores = [int(x) for x in linha[1:] if x.strip() != ""]
-            ecgs[sinal_id] = valores
+            signal_id = int(linha["signal_id"])
+            ecg_str = linha["ecg"]
+            valores = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
+            ecgs[signal_id] = valores
         except Exception as e:
-            print(f"Erro ao processar linha {linha[0]}: {e}")
+            st.warning(f"Erro ao processar sinal {linha}: {e}")
     return ecgs
+
 
 
 # 📡 Conectar às planilhas e carregar dados
