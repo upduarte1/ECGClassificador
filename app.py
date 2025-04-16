@@ -31,8 +31,6 @@ def carregar_sinais(sheet):
             st.warning(f"Erro ao processar sinal {linha}: {e}")
     return ecgs
 
-
-
 # 📡 Conectar às planilhas e carregar dados
 classificacoes_sheet, sinais_sheet = connect_sheets()
 ecgs = carregar_sinais(sinais_sheet)
@@ -74,14 +72,14 @@ if nome:
             st.session_state.rotulo_temp = rotulo
 
         with col1:
+            if st.button("⚠️ Fibrilhação"):
+                selecionar_rotulo("Fibrilhação")
+        with col2:
             if st.button("✅ Normal"):
                 selecionar_rotulo("Normal")
-        with col2:
-            if st.button("⚠️ Fibrilhação"):
-                selecionar_rotulo("Arritmia")
         with col3:
             if st.button("⚡ Ruidoso"):
-                selecionar_rotulo("Fibrilação")
+                selecionar_rotulo("Ruidoso")
         with col4:
             if st.button("❓ Outro"):
                 selecionar_rotulo("Outro")
