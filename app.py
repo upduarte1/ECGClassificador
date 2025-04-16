@@ -8,7 +8,8 @@ import json
 USUARIOS = {
     "joao": "1234",
     "maria": "abcd",
-    "luisa": "senha123"
+    "luisa": "senha123",
+    "dudi": "1234"
 }
 
 # 🔐 Estado de autenticação
