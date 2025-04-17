@@ -10,7 +10,7 @@ USUARIOS = {
     "maria": "abcd",
     "luisa": "senha123",
     "user5": "1234",
-    "user6": "1234",
+    "carol": "1234",
     "dudi": "1234"
 }
 
