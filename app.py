@@ -85,17 +85,17 @@ else:
     classification_sheet, signal_sheet = connect_sheets()
     ecgs = load_signals(signal_sheet)
 
-    # 📊 Load user progress
-    records = classification_sheet.get_all_records()
-    already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
-
-    total_signals = len(ecgs)
-    num_classified = len(already_classified_ids)
-    st.info(f"📈 Signals classified: {num_classified} / {total_signals}")
-
     # 📌 Select signals based on user role
     if role == "classifier":
         available_signals = [k for k in ecgs if k not in already_classified_ids]
+        
+        # 📊 Load user progress
+        records = classification_sheet.get_all_records()
+        already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
+    
+        total_signals = len(ecgs)
+        num_classified = len(already_classified_ids)
+        st.info(f"📈 Signals classified: {num_classified} / {total_signals}")
 
     elif role == "reviewer":
         conflicts = {}
