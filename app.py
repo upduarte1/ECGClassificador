@@ -112,7 +112,12 @@ else:
             sid for sid, votes in conflicts.items()
             if "user1" in votes and "user2" in votes and votes["user1"] != votes["user2"]
         ]
-
+        
+        # Show reviewer progress based on conflicting signals
+        num_reviewed = len([sid for sid in conflicting_signals if sid in already_classified_ids])
+        total_conflicts = len(conflicting_signals)
+        st.info(f"📈 Conflict signals reviewed: {num_reviewed} / {total_conflicts}")
+        
         available_signals = [k for k in conflicting_signals if k not in already_classified_ids]
 
     else:
