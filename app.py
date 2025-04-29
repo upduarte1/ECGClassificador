@@ -12,9 +12,9 @@ if "usuario" not in st.session_state:
 
 # 👥 Usuários autorizados
 USUARIOS = {
-    "joao": "1234",
-    "maria": "abcd",
-    "luisa": "senha123"
+    "user1": "1234",
+    "user2": "1234",
+    "user3": "1234"
 }
 
 # 🔑 Login
