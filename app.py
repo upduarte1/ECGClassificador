@@ -4,28 +4,25 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
 
-# 👥 Usuários autorizados
-USUARIOS = {
-    "joao": "1234",
-    "maria": "abcd",
-    "luisa": "senha123",
-    "user5": "1234",
-    "carol1": "abcd",
-    "dudi": "1234"
-}
-
 # 🔐 Estado de autenticação
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
 if "usuario" not in st.session_state:
     st.session_state.usuario = ""
 
+# 👥 Usuários autorizados
+USUARIOS = {
+    "joao": "1234",
+    "maria": "abcd",
+    "luisa": "senha123"
+}
+
 # 🔑 Login
 if not st.session_state.autenticado:
     st.title("Login")
 
     with st.form("login_form"):
-        usuario = st.text_input("Usuário").strip().lower()
+        usuario = st.selectbox("Usuário", list(USUARIOS.keys()))
         senha = st.text_input("Senha", type="password")
         submit = st.form_submit_button("Entrar")
 
@@ -36,7 +33,8 @@ if not st.session_state.autenticado:
                 st.success("Login realizado com sucesso!")
                 st.rerun()
             else:
-                st.error("Usuário ou senha incorretos.")
+                st.error("Senha incorreta.")
+
 
 # 🔁 App principal após login
 else:
