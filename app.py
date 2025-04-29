@@ -63,8 +63,8 @@ else:
         credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
         client = gspread.authorize(credentials)
 
-        classification_sheet = client.open("ECG Classificações").sheet1
-        signal_sheet = client.open("ECG Dados").sheet1
+        classification_sheet = client.open("ECG Classificações").worksheet("Folha1")
+        signal_sheet = client.open("ECG Dados").worksheet("Folha1")
         return classification_sheet, signal_sheet
 
     # 📥 Load signals from spreadsheet
