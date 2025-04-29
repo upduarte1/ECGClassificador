@@ -4,137 +4,168 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
 
-# 🔐 Estado de autenticação
-if "autenticado" not in st.session_state:
-    st.session_state.autenticado = False
-if "usuario" not in st.session_state:
-    st.session_state.usuario = ""
+# 🔐 Authentication state
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
 
-# 👥 Usuários autorizados
-USUARIOS = {
+# 👥 Authorized users
+USERS = {
     "user1": "1234",
     "user2": "1234",
     "user3": "1234"
 }
 
+# 👔 User roles
+ROLES = {
+    "user1": "classifier",
+    "user2": "classifier",
+    "user3": "reviewer"
+}
+
 # 🔑 Login
-if not st.session_state.autenticado:
+if not st.session_state.authenticated:
     st.title("Login")
 
     with st.form("login_form"):
-        usuario = st.selectbox("Usuário", list(USUARIOS.keys()))
-        senha = st.text_input("Senha", type="password")
-        submit = st.form_submit_button("Entrar")
+        username = st.selectbox("Username", list(USERS.keys()))
+        password = st.text_input("Password", type="password")
+        submit = st.form_submit_button("Login")
 
         if submit:
-            if usuario in USUARIOS and senha == USUARIOS[usuario]:
-                st.session_state.autenticado = True
-                st.session_state.usuario = usuario
-                st.success("Login realizado com sucesso!")
+            if username in USERS and password == USERS[username]:
+                st.session_state.authenticated = True
+                st.session_state.username = username
+                st.success("Login successful!")
                 st.rerun()
             else:
-                st.error("Senha incorreta.")
+                st.error("Incorrect password.")
 
-
-# 🔁 App principal após login
+# 🔁 Main app after login
 else:
-    nome = st.session_state.usuario
-    nome_exibido = nome.title()
-    st.sidebar.success(f"Bem vindo, Dr. {nome_exibido}")
+    username = st.session_state.username
+    user_display_name = username.title()
+    st.sidebar.success(f"Welcome, Dr. {user_display_name}")
+    role = ROLES.get(username, "unknown")
 
     if st.sidebar.button("Logout"):
-        st.session_state.autenticado = False
-        st.session_state.usuario = ""
+        st.session_state.authenticated = False
+        st.session_state.username = ""
         st.rerun()
 
-    st.title(f"Classificador de Sinais ECG")
+    st.title("ECG Signal Classifier")
 
-    # 📂 Conectar às planilhas
+    # 📂 Connect to Google Sheets
     def connect_sheets():
-        escopos = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        credenciais = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
-        credenciais = ServiceAccountCredentials.from_json_keyfile_dict(credenciais, escopos)
-        cliente = gspread.authorize(credenciais)
+        scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
+        client = gspread.authorize(credentials)
 
-        classificacoes_sheet = cliente.open("ECG Classificações").sheet1
-        sinais_sheet = cliente.open("ECG Dados").sheet1
-        return classificacoes_sheet, sinais_sheet
+        classification_sheet = client.open("ECG Classificações").sheet1
+        signal_sheet = client.open("ECG Dados").sheet1
+        return classification_sheet, signal_sheet
 
-    # 📥 Carregar sinais da planilha
-    def carregar_sinais(sheet):
-        registros = sheet.get_all_records()
+    # 📥 Load signals from spreadsheet
+    def load_signals(sheet):
+        records = sheet.get_all_records()
         ecgs = {}
-        for linha in registros:
+        for row in records:
             try:
-                signal_id = int(linha["signal_id"])
-                ecg_str = linha["ecg_signal"]
-                valores = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
-                ecgs[signal_id] = valores
+                signal_id = int(row["signal_id"])
+                ecg_str = row["ecg_signal"]
+                values = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
+                ecgs[signal_id] = values
             except Exception as e:
-                st.warning(f"Erro ao processar sinal {linha}: {e}")
+                st.warning(f"Error processing signal {row}: {e}")
         return ecgs
 
-    # 🔄 Conectar e carregar dados
-    classificacoes_sheet, sinais_sheet = connect_sheets()
-    ecgs = carregar_sinais(sinais_sheet)
+    # 🔄 Connect and load data
+    classification_sheet, signal_sheet = connect_sheets()
+    ecgs = load_signals(signal_sheet)
 
-    # 📊 Progresso do usuário
-    registros = classificacoes_sheet.get_all_records()
-    ids_classificados = {r['signal_id'] for r in registros if r['cardiologista'] == nome}
+    # 📊 Load user progress
+    records = classification_sheet.get_all_records()
+    already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
 
-    total_sinais = len(ecgs)
-    num_classificados = len(ids_classificados)
-    st.info(f"📈 Sinais classificados: {num_classificados} / {total_sinais}")
+    total_signals = len(ecgs)
+    num_classified = len(already_classified_ids)
+    st.info(f"📈 Signals classified: {num_classified} / {total_signals}")
 
-    # 📌 Exibir próximo sinal a classificar
-    sinais_disponiveis = [k for k in ecgs if k not in ids_classificados]
+    # 📌 Select signals based on user role
+    if role == "classifier":
+        available_signals = [k for k in ecgs if k not in already_classified_ids]
 
-    if sinais_disponiveis:
-        sinal_id = sinais_disponiveis[0]
-        st.subheader(f"Sinal ID: {sinal_id}")
-        st.line_chart(ecgs[sinal_id])
+    elif role == "reviewer":
+        conflicts = {}
+        for r in records:
+            sid = r["signal_id"]
+            doctor = r["cardiologist"]
+            label = r["classification"]
 
-        st.write("Classifique o sinal:")
+            if sid not in conflicts:
+                conflicts[sid] = {}
+            conflicts[sid][doctor] = label
+
+        conflicting_signals = [
+            sid for sid, votes in conflicts.items()
+            if "user1" in votes and "user2" in votes and votes["user1"] != votes["user2"]
+        ]
+
+        available_signals = [k for k in conflicting_signals if k not in already_classified_ids]
+
+    else:
+        st.error("Unknown user role. Please contact administrator.")
+        st.stop()
+
+    # 📉 Show signal to classify
+    if available_signals:
+        signal_id = available_signals[0]
+        st.subheader(f"Signal ID: {signal_id}")
+        st.line_chart(ecgs[signal_id])
+
+        st.write("Classify this signal:")
         col1, col2, col3, col4 = st.columns(4)
 
-        # 🔘 Funções de classificação
-        def selecionar_rotulo(rotulo):
-            st.session_state.rotulo_temp = rotulo
+        # 🔘 Classification buttons
+        def select_label(label):
+            st.session_state.temp_label = label
 
-        if "rotulo_temp" not in st.session_state:
-            st.session_state.rotulo_temp = None
-        if "comentario_temp" not in st.session_state:
-            st.session_state.comentario_temp = ""
+        if "temp_label" not in st.session_state:
+            st.session_state.temp_label = None
+        if "temp_comment" not in st.session_state:
+            st.session_state.temp_comment = ""
 
         with col1:
-            if st.button("⚠️ Fibrilhação"):
-                selecionar_rotulo("Fibrilhação")
+            if st.button("⚠️ Fibrillation"):
+                select_label("Fibrillation")
         with col2:
             if st.button("✅ Normal"):
-                selecionar_rotulo("Normal")
+                select_label("Normal")
         with col3:
-            if st.button("⚡ Ruidoso"):
-                selecionar_rotulo("Ruidoso")
+            if st.button("⚡ Noisy"):
+                select_label("Noisy")
         with col4:
-            if st.button("❓ Outro"):
-                selecionar_rotulo("Outro")
+            if st.button("❓ Other"):
+                select_label("Other")
 
-        if st.session_state.rotulo_temp:
-            st.write(f"Você selecionou: **{st.session_state.rotulo_temp}**")
-            st.session_state.comentario_temp = st.text_input("Comentário (opcional):", value=st.session_state.comentario_temp)
+        if st.session_state.temp_label:
+            st.write(f"You selected: **{st.session_state.temp_label}**")
+            st.session_state.temp_comment = st.text_input("Comment (optional):", value=st.session_state.temp_comment)
 
-            if st.button("Confirmar classificação"):
-                agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                classificacoes_sheet.append_row([
-                    sinal_id,
-                    nome,
-                    st.session_state.rotulo_temp,
-                    agora,
-                    st.session_state.comentario_temp
+            if st.button("Confirm classification"):
+                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                classification_sheet.append_row([
+                    signal_id,
+                    username,
+                    st.session_state.temp_label,
+                    now,
+                    st.session_state.temp_comment
                 ])
-                st.success(f"Sinal {sinal_id} classificado como '{st.session_state.rotulo_temp}'!")
-                st.session_state.rotulo_temp = None
-                st.session_state.comentario_temp = ""
+                st.success(f"Signal {signal_id} classified as '{st.session_state.temp_label}'!")
+                st.session_state.temp_label = None
+                st.session_state.temp_comment = ""
                 st.rerun()
     else:
-        st.info("🎉 Você já classificou todos os sinais disponíveis! Obrigado!")
+        st.info("🎉 You have classified all available signals! Thank you!")
