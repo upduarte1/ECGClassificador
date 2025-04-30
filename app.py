@@ -4,36 +4,39 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
 
-# 🔐 Authentication state
+# Authentication state
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "username" not in st.session_state:
     st.session_state.username = ""
 
-# 👥 Authorized users
+# Authorized users
 USERS = {
     "user1": "1234",
     "user2": "1234",
     "user3": "1234"
 }
 
-# 👔 User roles
+# User roles
 ROLES = {
     "user1": "classifier",
     "user2": "classifier",
     "user3": "reviewer"
 }
 
-# 🔑 Login
+# Login
 if not st.session_state.authenticated:
+    
     st.title("Login")
-
+    
     with st.form("login_form"):
+        
         username = st.selectbox("Username", list(USERS.keys()))
         password = st.text_input("Password", type="password")
         submit = st.form_submit_button("Login")
 
         if submit:
+            
             if username in USERS and password == USERS[username]:
                 st.session_state.authenticated = True
                 st.session_state.username = username
@@ -42,8 +45,9 @@ if not st.session_state.authenticated:
             else:
                 st.error("Incorrect password.")
 
-# 🔁 Main app after login
+# Main app after login
 else:
+    
     username = st.session_state.username
     user_display_name = username.title()
     st.sidebar.success(f"Welcome, Dr. {user_display_name}")
@@ -56,8 +60,9 @@ else:
 
     st.title("ECG Signal Classifier")
 
-    # 📂 Connect to Google Sheets
+    # Connect to Google Sheets
     def connect_sheets():
+        
         scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
         credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
@@ -67,11 +72,13 @@ else:
         signal_sheet = client.open("ECG Dados").worksheet("Folha1")
         return classification_sheet, signal_sheet
 
-    # 📥 Load signals from spreadsheet
+    # Load signals from spreadsheet
     def load_signals(sheet):
+        
         records = sheet.get_all_records()
         ecgs = {}
         heart_rates = {}
+        
         for row in records:
             try:
                 signal_id = int(row["signal_id"])
@@ -82,18 +89,19 @@ else:
                 heart_rates[signal_id] = heart_rate
             except Exception as e:
                 st.warning(f"Erro ao processar o sinal {row.get('signal_id', '?')}: {e}")
+                
         return ecgs, heart_rates
 
-
-    # 🔄 Connect and load data
+    # Connect and load data
     classification_sheet, signal_sheet = connect_sheets()
     ecgs, heart_rates = load_signals(signal_sheet)
     
-    # 📊 Load all classification records here
+    # Load all classification records here
     records = classification_sheet.get_all_records()
     
-    # 📌 Select signals based on user role
+    # Select signals based on user role
     if role == "classifier":
+        
         already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
         available_signals = [k for k in ecgs if k not in already_classified_ids]
     
@@ -102,6 +110,7 @@ else:
         st.info(f"📈 Signals classified: {num_classified} / {total_signals}")
     
     elif role == "reviewer":
+        
         conflicts = {}
         for r in records:
             sid = r["signal_id"]
@@ -128,8 +137,9 @@ else:
         st.error("Unknown user role. Please contact administrator.")
         st.stop()
 
-    # 📉 Show signal to classify
+    # Show signal to classify
     if available_signals:
+        
         signal_id = available_signals[0]
         st.subheader(f"Signal ID: {signal_id}")
         st.line_chart(ecgs[signal_id])
@@ -138,7 +148,7 @@ else:
         # st.write("Classify this signal:")
         col1, col2, col3, col4 = st.columns(4)
 
-        # 🔘 Classification buttons
+        # Classification buttons
         def select_label(label):
             st.session_state.temp_label = label
 
@@ -161,12 +171,8 @@ else:
                 select_label("Other")
 
         if st.session_state.temp_label:
-            label = st.session_state.temp_label
-            if label:
-                st.write(f"You selected: **{label}**")
-            else:
-                st.write("You selected: —")
-
+            
+            st.write(f"You selected: **{st.session_state.temp_label}**")
             st.session_state.temp_comment = st.text_input("Comment (optional):", value=st.session_state.temp_comment)
 
             if st.button("Confirm classification"):
@@ -184,3 +190,4 @@ else:
                 st.rerun()
     else:
         st.info("🎉 You have classified all available signals! Thank you!")
+        
