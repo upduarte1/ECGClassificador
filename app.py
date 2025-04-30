@@ -71,19 +71,22 @@ else:
     def load_signals(sheet):
         records = sheet.get_all_records()
         ecgs = {}
+        heart_rates = {}
         for row in records:
             try:
                 signal_id = int(row["signal_id"])
+                heart_rate = float(row["heart_rate"])
                 ecg_str = row["ecg_signal"]
                 values = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
                 ecgs[signal_id] = values
+                heart_rates[signal_id] = heart_rate
             except Exception as e:
                 st.warning(f"Error processing signal {row}: {e}")
-        return ecgs
+        return ecgs, heart_rates
 
     # 🔄 Connect and load data
     classification_sheet, signal_sheet = connect_sheets()
-    ecgs = load_signals(signal_sheet)
+    ecgs, heart_rates = load_signals(signal_sheet)
     
     # 📊 Load all classification records here
     records = classification_sheet.get_all_records()
@@ -128,6 +131,7 @@ else:
     if available_signals:
         signal_id = available_signals[0]
         st.subheader(f"Signal ID: {signal_id}")
+        st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
         st.line_chart(ecgs[signal_id])
 
         st.write("Classify this signal:")
