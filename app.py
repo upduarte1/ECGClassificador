@@ -161,7 +161,12 @@ else:
                 select_label("Other")
 
         if st.session_state.temp_label:
-            st.write(f"You selected: **{st.session_state.temp_label}**")
+            label = st.session_state.temp_label
+            if label:
+                st.write(f"You selected: **{label}**")
+            else:
+                st.write("You selected: —")
+
             st.session_state.temp_comment = st.text_input("Comment (optional):", value=st.session_state.temp_comment)
 
             if st.button("Confirm classification"):
