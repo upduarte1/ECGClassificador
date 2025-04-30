@@ -81,8 +81,9 @@ else:
                 ecgs[signal_id] = values
                 heart_rates[signal_id] = heart_rate
             except Exception as e:
-                st.warning(f"Error processing signal {row}: {e}")
+                st.warning(f"Erro ao processar o sinal {row.get('signal_id', '?')}: {e}")
         return ecgs, heart_rates
+
 
     # 🔄 Connect and load data
     classification_sheet, signal_sheet = connect_sheets()
