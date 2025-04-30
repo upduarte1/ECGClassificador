@@ -135,7 +135,7 @@ else:
         st.line_chart(ecgs[signal_id])
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
 
-        st.write("Classify this signal:")
+        # st.write("Classify this signal:")
         col1, col2, col3, col4 = st.columns(4)
 
         # 🔘 Classification buttons
