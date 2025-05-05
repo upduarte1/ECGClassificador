@@ -143,7 +143,7 @@ else:
         signal_id = available_signals[0]
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
-        
+
         import pandas as pd
         import altair as alt
         
@@ -172,8 +172,10 @@ else:
             title=f"ECG Signal ID {signal_id} (30s)"
         )
         
-        # Exibindo o gráfico no Streamlit
-        st.altair_chart(chart, use_container_width=True)
+        # Criando um container com scroll horizontal
+        st.markdown("<div style='overflow-x: auto;'>", unsafe_allow_html=True)
+        st.altair_chart(chart, use_container_width=False)  # use_container_width=False para manter a largura original
+        st.markdown("</div>", unsafe_allow_html=True)
         
 
 
