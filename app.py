@@ -148,36 +148,39 @@ else:
 
 
         def plot_ecg_scaled(ecg_signal, sampling_rate=300, signal_id=""):
-
-            duration = len(ecg_signal) / sampling_rate
-            time_sec = np.linspace(0, duration, len(ecg_signal))  # Tempo real em segundos
+            duration_seconds = len(ecg_signal) / sampling_rate
+            time = np.arange(len(ecg_signal)) / sampling_rate
         
-            fig, ax = plt.subplots(figsize=(15, 5), dpi=100)
+            # Escalas padrão: 25 mm/s => 1 s = 25 mm => 1 mm = 0.04 s
+            # Para 30 s: 30 s * 25 mm = 750 mm de largura
+            # 10 mm = 1 mV => 1 mm = 0.1 mV
         
-            # Grade fina (1 mm = 0.04 s)
-            minor_x = np.arange(0, duration, 0.04)
-            minor_y = np.arange(-500, 1500, 0.1)
+            fig, ax = plt.subplots(figsize=(15, 5))
+        
+            ax.plot(time, ecg_signal, linewidth=1)
+        
+            # Grid vertical: a cada 0.04 s (1 mm) e mais grosso a cada 0.2 s (5 mm)
+            minor_x = np.arange(0, duration_seconds, 0.04)
+            major_x = np.arange(0, duration_seconds, 0.2)
             ax.set_xticks(minor_x, minor=True)
+            ax.set_xticks(major_x, minor=False)
+        
+            # Grid horizontal: a cada 0.1 mV (1 mm) e mais grosso a cada 0.5 mV (5 mm)
+            minor_y = np.arange(-2, 2.1, 0.1)
+            major_y = np.arange(-2, 2.1, 0.5)
             ax.set_yticks(minor_y, minor=True)
-            ax.grid(which='minor', color='red', linestyle='-', linewidth=0.2)
+            ax.set_yticks(major_y, minor=False)
         
-            # Grade grossa (5 mm = 0.2 s)
-            major_x = np.arange(0, duration, 0.2)
-            major_y = np.arange(-500, 1500, 0.5)
-            ax.set_xticks(major_x)
-            ax.set_yticks(major_y)
-            ax.grid(which='major', color='red', linestyle='-', linewidth=0.6)
+            # Configurações da grelha
+            ax.grid(which='minor', color='red', linestyle='-', linewidth=0.5, alpha=0.3)
+            ax.grid(which='major', color='red', linestyle='-', linewidth=1)
         
-            # ECG plot
-            ax.plot(time_sec, ecg_signal, color='black', linewidth=1)
-            ax.set_xlim([0, duration])
-            ax.set_ylim([-1.5, 1.5])  # ou ajusta conforme tua amplitude real
-        
-            ax.set_title(f"ECG Signal ID {signal_id} ({duration:.0f}s)")
+            ax.set_title(f"ECG Signal ID {signal_id} (30s)")
             ax.set_xlabel("Tempo (segundos)")
-            ax.set_ylabel("Amplitude (mV)\n[10 mm = 1 mV]")
+            ax.set_ylabel("Amplitude (mV) [10 mm = 1 mV]")
         
-            st.pyplot(fig)
+            plt.tight_layout()
+            plt.show()
 
 
 
