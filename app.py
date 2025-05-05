@@ -144,6 +144,7 @@ else:
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
         
+
         import matplotlib.pyplot as plt
         import numpy as np
         import streamlit as st
@@ -158,6 +159,7 @@ else:
         time_axis = np.linspace(0, signal_duration_sec, num_samples)
         
         # Escala para 25 mm/s no eixo do tempo (300 Hz => 25 mm/s)
+        # Para um gráfico de 30 segundos, a escala será ajustada para 25 mm/s
         time_axis_scaled = time_axis * 25  # 25 mm por segundo
         
         # Escala de amplitude para 10 mm = 1 mV
@@ -169,24 +171,26 @@ else:
         
         # Ajustando a escala do gráfico
         ax.set_title(f"ECG Signal ID {signal_id} (30s)")
-        ax.set_xlabel("Tempo (mm) [25 mm/s]")
+        ax.set_xlabel("Tempo (mm) [25 mm/s] - 30 segundos")
         ax.set_ylabel("Amplitude (mV) [10 mm = 1 mV]")
         
         # Adicionando a grade para simular papel milimétrico
-        # Linhas no eixo X a cada 25 unidades (representando 25 mm/s)
+        # Linhas no eixo X a cada 25 unidades (representando 25 mm/s, ou seja, 1 segundo)
         ax.grid(which='both', axis='x', linestyle='-', color='gray', linewidth=0.5)
         
         # Linhas no eixo Y a cada 10 unidades (representando 10 mm = 1 mV)
         ax.grid(which='both', axis='y', linestyle='-', color='gray', linewidth=0.5)
         
         # Adicionando linhas horizontais e verticais para simular a "grade" do papel milimétrico
+        # Eixo X - Linhas verticais a cada 25 unidades (representando 25 mm/s, ou seja, cada segundo)
         for x in range(0, int(time_axis_scaled[-1]), 25):  # Cada 25 mm no eixo X
             ax.axvline(x=x, color='gray', linestyle='-', linewidth=0.5)
         
+        # Eixo Y - Linhas horizontais a cada 10 unidades (representando 1 mV)
         for y in range(-2, 2, 1):  # Cada 1 mV no eixo Y (10mm)
             ax.axhline(y=y * 10, color='gray', linestyle='-', linewidth=0.5)
         
-        # Adicionando a rolagem horizontal
+        # Exibindo o gráfico com o efeito de "papel milimétrico"
         st.markdown("<div style='overflow-x: auto;'>", unsafe_allow_html=True)
         st.pyplot(fig)  # Exibindo o gráfico Matplotlib
         st.markdown("</div>", unsafe_allow_html=True)
