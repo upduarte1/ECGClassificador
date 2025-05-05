@@ -158,20 +158,26 @@ else:
         ecg_values = ecgs[signal_id][:num_samples]
         time_axis = np.linspace(0, signal_duration_sec, num_samples)
         
+        # Escala para 25 mm/s no eixo do tempo (300 Hz => 25 mm/s)
+        time_axis_scaled = time_axis * 25  # 25 mm por segundo
+        
+        # Escala de amplitude para 10 mm = 1 mV
+        ecg_values_scaled = np.array(ecg_values)  # Aqui você pode multiplicar por um fator para ajustar a amplitude (se necessário)
+        
         # Criando o gráfico com Matplotlib
         fig, ax = plt.subplots(figsize=(15, 5))  # Tamanho do gráfico ajustado para 30s
-        ax.plot(time_axis, ecg_values)
+        ax.plot(time_axis_scaled, ecg_values_scaled)
         
         # Ajustando a escala do gráfico
         ax.set_title(f"ECG Signal ID {signal_id} (30s)")
-        ax.set_xlabel("Tempo (s)")
-        ax.set_ylabel("Amplitude (mV)")
+        ax.set_xlabel("Tempo (mm) [25 mm/s]")
+        ax.set_ylabel("Amplitude (mV) [10 mm = 1 mV]")
         
         # Adicionando a rolagem horizontal
         st.markdown("<div style='overflow-x: auto;'>", unsafe_allow_html=True)
         st.pyplot(fig)  # Exibindo o gráfico Matplotlib
         st.markdown("</div>", unsafe_allow_html=True)
-        
+
 
 
 
