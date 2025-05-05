@@ -3,6 +3,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Authentication state
 if "authenticated" not in st.session_state:
@@ -143,61 +145,46 @@ else:
         signal_id = available_signals[0]
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
-        
-
-        import matplotlib.pyplot as plt
-        import numpy as np
-        import streamlit as st
-        
-        # Parâmetros de amostragem e duração
-        sampling_rate = 300  # Hz
-        signal_duration_sec = 30  # duração do sinal (30 segundos)
-        num_samples = sampling_rate * signal_duration_sec  # 9000 amostras
-        
-        # Gerando os dados do ECG (substitua por seus dados reais)
-        ecg_values = ecgs[signal_id][:num_samples]
-        time_axis = np.linspace(0, signal_duration_sec, num_samples)
-        
-        # Escala para 25 mm/s no eixo do tempo (300 Hz => 25 mm/s)
-        # Para um gráfico de 30 segundos, a escala será ajustada para 25 mm/s
-        time_axis_scaled = time_axis * 25  # 25 mm por segundo
-        
-        # Escala de amplitude para 10 mm = 1 mV
-        ecg_values_scaled = np.array(ecg_values)  # Aqui você pode multiplicar por um fator para ajustar a amplitude (se necessário)
-        
-        # Criando o gráfico com Matplotlib
-        fig, ax = plt.subplots(figsize=(15, 5))  # Tamanho do gráfico ajustado para 30s
-        ax.plot(time_axis_scaled, ecg_values_scaled)
-        
-        # Ajustando a escala do gráfico
-        ax.set_title(f"ECG Signal ID {signal_id} (30s)")
-        ax.set_xlabel("Tempo (mm) [25 mm/s] - 30 segundos")
-        ax.set_ylabel("Amplitude (mV) [10 mm = 1 mV]")
-        
-        # Adicionando a grade para simular papel milimétrico
-        # Linhas no eixo X a cada 25 unidades (representando 25 mm/s, ou seja, 1 segundo)
-        ax.grid(which='both', axis='x', linestyle='-', color='gray', linewidth=0.5)
-        
-        # Linhas no eixo Y a cada 10 unidades (representando 10 mm = 1 mV)
-        ax.grid(which='both', axis='y', linestyle='-', color='gray', linewidth=0.5)
-        
-        # Adicionando linhas horizontais e verticais para simular a "grade" do papel milimétrico
-        # Eixo X - Linhas verticais a cada 25 unidades (representando 25 mm/s, ou seja, cada segundo)
-        for x in range(0, int(time_axis_scaled[-1]), 25):  # Cada 25 mm no eixo X
-            ax.axvline(x=x, color='gray', linestyle='-', linewidth=0.5)
-        
-        # Eixo Y - Linhas horizontais a cada 10 unidades (representando 1 mV)
-        for y in range(-2, 2, 1):  # Cada 1 mV no eixo Y (10mm)
-            ax.axhline(y=y * 10, color='gray', linestyle='-', linewidth=0.5)
-        
-        # Exibindo o gráfico com o efeito de "papel milimétrico"
-        st.markdown("<div style='overflow-x: auto;'>", unsafe_allow_html=True)
-        st.pyplot(fig)  # Exibindo o gráfico Matplotlib
-        st.markdown("</div>", unsafe_allow_html=True)
 
 
+        def plot_ecg(ecg_signal, sampling_rate=300, signal_id=""):
+        
+            duration = len(ecg_signal) / sampling_rate
+            time = np.linspace(0, duration, len(ecg_signal))
+        
+            fig, ax = plt.subplots(figsize=(15, 5), dpi=100)
+        
+            # Fundo branco
+            ax.set_facecolor('white')
+        
+            # Grade fina (1 mm) → 0.04s (25 mm/s), 0.1 mV
+            minor_ticks_x = np.arange(0, duration, 0.04)
+            minor_ticks_y = np.arange(-200, 500, 10)
+            ax.set_xticks(minor_ticks_x, minor=True)
+            ax.set_yticks(minor_ticks_y, minor=True)
+            ax.grid(which='minor', color='red', linestyle='-', linewidth=0.2)
+        
+            # Grade grossa (5 mm) → 0.2s e 0.5mV
+            major_ticks_x = np.arange(0, duration, 0.2)
+            major_ticks_y = np.arange(-200, 500, 50)
+            ax.set_xticks(major_ticks_x)
+            ax.set_yticks(major_ticks_y)
+            ax.grid(which='major', color='red', linestyle='-', linewidth=0.6)
+        
+            # Plot do sinal
+            ax.plot(time, ecg_signal, color='black', linewidth=1)
+        
+            ax.set_title(f"ECG\n{signal_id}", fontsize=14, weight='bold')
+            ax.set_xlabel("Tempo (segundos)")
+            ax.set_ylabel("ECG (mV)")
+            ax.set_ylim([-200, 500])
+        
+            st.pyplot(fig)
 
 
+        plot_ecg(ecgs[signal_id], sampling_rate=300, signal_id=signal_id)
+    
+        
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
 
         # st.write("Classify this signal:")
