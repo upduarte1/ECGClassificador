@@ -145,9 +145,6 @@ else:
         signal_id = available_signals[0]
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
-        import matplotlib.pyplot as plt
-        import numpy as np
-        import streamlit as st
         
         def show_ecg_plot(signal, sampling_frequency, signal_id):
             duration = 30  # segundos para exibir
@@ -189,7 +186,7 @@ else:
             st.pyplot(fig)
 
 
-       show_ecg_plot(ecgs[signal_id], sampling_frequency=300, signal_id=signal_id)
+        show_ecg_plot(ecgs[signal_id], sampling_frequency=300, signal_id=signal_id)
     
         
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
