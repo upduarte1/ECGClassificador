@@ -153,22 +153,16 @@ else:
             fig, ax = plt.subplots(figsize=(15, 5))
             ax.plot(time, ecg_signal, color="black", linewidth=0.8)
         
-            # Grelha tipo papel ECG: linhas vermelhas
-            ax.set_facecolor('#fffafa')  # fundo levemente rosado como papel
+            ax.set_facecolor('#fffafa')  # fundo levemente rosado
             ax.set_xlim(0, 30)  # 30 segundos
         
-            # Escala: 25 mm/s → 1 s = 25 mm, então queremos grid a cada 0.04s e 0.2s
-            # Menor grid: 0.04s (1 mm)
             ax.set_xticks(np.arange(0, 30, 0.04), minor=True)
-            # Maior grid: 0.2s (5 mm)
             ax.set_xticks(np.arange(0, 30, 0.2), minor=False)
         
-            # Eixo Y: 10 mm = 1 mV → grid menor 0.1 mV, maior 0.5 mV
             ax.set_yticks(np.arange(-2, 2.1, 0.1), minor=True)
             ax.set_yticks(np.arange(-2, 2.1, 0.5), minor=False)
             ax.set_ylim(-2, 2)
         
-            # Estilo da grelha
             ax.grid(which='minor', color='red', linestyle='-', linewidth=0.25)
             ax.grid(which='major', color='red', linestyle='-', linewidth=0.7)
         
@@ -177,7 +171,8 @@ else:
             ax.set_ylabel("Amplitude (mV)")
         
             plt.tight_layout()
-            plt.show()
+            st.pyplot(fig)  # <-- ESSENCIAL NO STREAMLIT
+        
 
 
 
