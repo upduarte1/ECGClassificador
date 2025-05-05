@@ -194,7 +194,7 @@ else:
             ax.set_yticks(np.arange(-2, 2.5, 0.5))
             ax.grid(False)
             plt.tight_layout()
-            plt.show()
+            st.pyplot(fig)
 
 
 
