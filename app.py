@@ -150,41 +150,44 @@ else:
         import streamlit as st
         
         def show_ecg_plot(signal, sampling_frequency, signal_id):
-            duration = 30  # seconds to display
+            duration = 30  # segundos para exibir
+            num_samples = int(duration * sampling_frequency)
+            
+            # Cortar o sinal
+            signal = signal[:num_samples]
             t = np.arange(len(signal)) / sampling_frequency
-            
-            # Cut signal if longer than 30 seconds
-            if len(t) > sampling_frequency * duration:
-                t = t[:int(sampling_frequency * duration)]
-                signal = signal[:int(sampling_frequency * duration)]
-            
-            fig, ax = plt.subplots(figsize=(15, 5))
-            
-            ax.set_xlim([0, 30])
-            ax.set_ylim([-200, 500])
-            
-            # Grade vertical: 1mm = 0.04s, 5mm = 0.2s
-            for x in np.arange(0, 30.04, 0.2):  # 5mm
-                ax.axvline(x=x, color='red', linewidth=0.5, alpha=0.3)
-            for x in np.arange(0, 30.04, 0.04):  # 1mm
-                ax.axvline(x=x, color='red', linewidth=0.5, alpha=0.1)
         
-            # Grade horizontal: 1mm = 10µV, 5mm = 50µV
-            for y in np.arange(-200, 501, 50):  # 5mm
-                ax.axhline(y=y, color='red', linewidth=0.5, alpha=0.3)
-            for y in np.arange(-200, 501, 10):  # 1mm
-                ax.axhline(y=y, color='red', linewidth=0.5, alpha=0.1)
+            fig, ax = plt.subplots(figsize=(15, 4))
             
-            # Plot ECG
+            # Limites
+            ax.set_xlim([0, duration])
+            y_min, y_max = np.min(signal), np.max(signal)
+            margin = 0.1 * (y_max - y_min)
+            ax.set_ylim([y_min - margin, y_max + margin])
+            
+            # Grades verticais (1mm = 0.04s, 5mm = 0.2s)
+            for x in np.arange(0, duration, 0.2):
+                ax.axvline(x, color='red', linewidth=0.5, alpha=0.3)
+            for x in np.arange(0, duration, 0.04):
+                ax.axvline(x, color='red', linewidth=0.5, alpha=0.1)
+            
+            # Grades horizontais (1mm = 0.1 mV, 5mm = 0.5 mV)
+            for y in np.arange(np.floor(y_min), np.ceil(y_max), 0.5):
+                ax.axhline(y, color='red', linewidth=0.5, alpha=0.3)
+            for y in np.arange(np.floor(y_min), np.ceil(y_max), 0.1):
+                ax.axhline(y, color='red', linewidth=0.5, alpha=0.1)
+            
+            # Plot
             ax.plot(t, signal, color='black', linewidth=0.8)
+            ax.set_title(f"ECG Signal ID {signal_id}")
+            ax.set_xlabel("Tempo (segundos)")
+            ax.set_ylabel("Amplitude (mV)")
             
-            ax.set_xlabel('Tempo (s)')
-            ax.set_ylabel('ECG (mV)')
-            ax.set_title(f'ECG - Signal ID: {signal_id}')
-            ax.set_xticks(np.arange(0, 30.1, 2.5))
-            ax.set_yticks(np.arange(-200, 501, 100))
-            
+            # Ticks a cada 2.5 segundos
+            ax.set_xticks(np.arange(0, duration + 0.1, 2.5))
+        
             st.pyplot(fig)
+
 
        show_ecg_plot(ecgs[signal_id], sampling_frequency=300, signal_id=signal_id)
     
