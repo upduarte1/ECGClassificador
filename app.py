@@ -143,11 +143,11 @@ else:
         signal_id = available_signals[0]
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
-
+        
         import pandas as pd
         import altair as alt
         
-        sampling_rate = 250  # amostras por segundo
+        sampling_rate = 300  # Hz
         ecg_values = ecgs[signal_id]
         time_axis = [i / sampling_rate for i in range(len(ecg_values))]
         
@@ -157,11 +157,12 @@ else:
         })
         
         chart = alt.Chart(df).mark_line().encode(
-            x=alt.X("Time (s)", scale=alt.Scale(domain=[0, max(time_axis)])),
-            y=alt.Y("Amplitude (mV)", scale=alt.Scale(domain=[-2, 2]))  # ajustável conforme os dados
+            x=alt.X("Time (s)", axis=alt.Axis(title="Tempo (s)", grid=True)),
+            y=alt.Y("Amplitude (mV)", scale=alt.Scale(domain=[-2, 2]), axis=alt.Axis(grid=True))
         ).properties(
-            width=1000,  # largura do gráfico em pixels (25 mm/s ~ 250 px/s)
-            height=300
+            width=len(ecg_values) / sampling_rate * 250,  # 25 mm/s ≈ 250 px/s (assuming 10 px ≈ 1 mm)
+            height=300,
+            title=f"Sinal ECG ID {signal_id}"
         )
         
         st.altair_chart(chart, use_container_width=True)
