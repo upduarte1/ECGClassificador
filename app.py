@@ -142,7 +142,58 @@ else:
         
         signal_id = available_signals[0]
         st.subheader(f"Signal ID: {signal_id}")
-        st.line_chart(ecgs[signal_id])
+        # st.line_chart(ecgs[signal_id])
+        import pandas as pd
+        import altair as alt
+        
+        # Suponha que já temos:
+        # ecgs[signal_id] e heart_rates[signal_id]
+        
+        sampling_rate = 300  # 250 amostras por segundo
+        ecg_values = ecgs[signal_id]
+        time_axis = [i / sampling_rate for i in range(len(ecg_values))]
+        
+        # Criar DataFrame do sinal
+        df = pd.DataFrame({
+            "Time (s)": time_axis,
+            "Amplitude (mV)": ecg_values
+        })
+        
+        # Parâmetros da grade
+        max_time = max(time_axis)
+        y_min, y_max = -2.0, 2.0  # ajustar conforme necessário
+        
+        # Linhas de grade verticais (tempo)
+        minor_time_ticks = [round(x * 0.04, 4) for x in range(int(max_time / 0.04) + 1)]
+        major_time_ticks = [round(x * 0.2, 4) for x in range(int(max_time / 0.2) + 1)]
+        
+        # Linhas de grade horizontais (amplitude)
+        minor_amp_ticks = [round(y_min + 0.1 * i, 3) for i in range(int((y_max - y_min) / 0.1) + 1)]
+        major_amp_ticks = [round(y_min + 0.5 * i, 3) for i in range(int((y_max - y_min) / 0.5) + 1)]
+        
+        # Criar grades menores
+        minor_grid_v = alt.Chart(pd.DataFrame({"x": minor_time_ticks})).mark_rule(color="#ffcccc").encode(x="x:Q")
+        minor_grid_h = alt.Chart(pd.DataFrame({"y": minor_amp_ticks})).mark_rule(color="#ffcccc").encode(y="y:Q")
+        
+        # Criar grades maiores
+        major_grid_v = alt.Chart(pd.DataFrame({"x": major_time_ticks})).mark_rule(color="#ff6666", strokeWidth=1.5).encode(x="x:Q")
+        major_grid_h = alt.Chart(pd.DataFrame({"y": major_amp_ticks})).mark_rule(color="#ff6666", strokeWidth=1.5).encode(y="y:Q")
+        
+        # Traçado do ECG
+        line = alt.Chart(df).mark_line(color="black").encode(
+            x=alt.X("Time (s)", scale=alt.Scale(domain=[0, max_time])),
+            y=alt.Y("Amplitude (mV)", scale=alt.Scale(domain=[y_min, y_max]))
+        )
+        
+        # Juntar tudo
+        chart = (minor_grid_v + minor_grid_h + major_grid_v + major_grid_h + line).properties(
+            width=1000,
+            height=300,
+            title=f"ECG - Signal ID {signal_id} | HR: {heart_rates[signal_id]} bpm"
+        )
+        
+        st.altair_chart(chart, use_container_width=True)
+
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
 
         # st.write("Classify this signal:")
