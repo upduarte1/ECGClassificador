@@ -181,7 +181,7 @@ else:
 
 
 
-        plot_ecg(ecgs[signal_id], sampling_rate=300, signal_id=signal_id)
+        plot_ecg_scaled(ecgs[signal_id], sampling_rate=300, signal_id=signal_id)
     
         
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
