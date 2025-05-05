@@ -146,61 +146,53 @@ else:
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
 
+       
         import numpy as np
         import matplotlib.pyplot as plt
-        
+
         def show_ecg_plot(signal, sampling_frequency=300, signal_id=None):
-            # Garantir que é um array NumPy de floats
+            # Verificar e limpar o sinal
             signal = np.array(signal, dtype=float)
-        
-            # Eliminar valores inválidos
             signal = signal[np.isfinite(signal)]
-            
-            # Verificar se o sinal está vazio
+        
             if len(signal) == 0:
-                print(f"ECG signal ID {signal_id} is empty or contains only invalid values.")
+                print(f"ECG signal ID {signal_id} is empty or invalid.")
                 return
         
-            # Gerar vetor de tempo
+            # Tempo (em segundos)
             t = np.arange(len(signal)) / sampling_frequency
+            duration = 30  # mostrar apenas 30 segundos
+            samples_to_show = int(duration * sampling_frequency)
+            t = t[:samples_to_show]
+            signal = signal[:samples_to_show]
         
-            # Limites de tempo
-            duration = min(30, len(t) / sampling_frequency)  # máximo de 30 segundos
-            t = t[:int(duration * sampling_frequency)]
-            signal = signal[:len(t)]
+            fig, ax = plt.subplots(figsize=(16, 6))
         
-            fig, ax = plt.subplots(figsize=(15, 5))
+            # Grade ECG (vertical: tempo; horizontal: mV)
+            for x in np.arange(0, duration, 0.2):  # 5 mm (0.2 s)
+                ax.axvline(x, color='red', lw=0.5, alpha=0.4)
+            for x in np.arange(0, duration, 0.04):  # 1 mm (0.04 s)
+                ax.axvline(x, color='red', lw=0.5, alpha=0.1)
         
-            # Plot da grade vermelha tipo ECG (1 mm e 5 mm)
-            for x in np.arange(0, duration, 0.2):  # 5 mm (0.2s)
-                ax.axvline(x, color='red', linewidth=0.5, alpha=0.3)
-            for x in np.arange(0, duration, 0.04):  # 1 mm (0.04s)
-                ax.axvline(x, color='red', linewidth=0.5, alpha=0.1)
+            for y in np.arange(-2, 2.5, 0.5):  # 5 mm (0.5 mV)
+                ax.axhline(y, color='red', lw=0.5, alpha=0.4)
+            for y in np.arange(-2, 2.5, 0.1):  # 1 mm (0.1 mV)
+                ax.axhline(y, color='red', lw=0.5, alpha=0.1)
         
-            y_min, y_max = np.min(signal), np.max(signal)
-            y_margin = (y_max - y_min) * 0.1 if y_max != y_min else 0.5
-            y_lower = y_min - y_margin
-            y_upper = y_max + y_margin
+            # Plotar ECG
+            ax.plot(t, signal, color='black', linewidth=1)
         
-            for y in np.arange(np.floor(y_lower), np.ceil(y_upper), 0.5):  # 5 mm (0.5 mV)
-                ax.axhline(y, color='red', linewidth=0.5, alpha=0.3)
-            for y in np.arange(np.floor(y_lower), np.ceil(y_upper), 0.1):  # 1 mm (0.1 mV)
-                ax.axhline(y, color='red', linewidth=0.5, alpha=0.1)
-        
-            # Plotar o sinal ECG
-            ax.plot(t, signal, color='black', linewidth=0.8)
-        
-            # Títulos e rótulos
+            # Eixos e título
             ax.set_xlim(0, duration)
-            ax.set_ylim([y_lower, y_upper])
+            ax.set_ylim(-2, 2)
             ax.set_xlabel('Tempo (segundos)')
             ax.set_ylabel('Amplitude (mV)')
-            ax.set_title(f'ECG Signal ID {signal_id}' if signal_id is not None else 'ECG Signal')
+            ax.set_title(f'ECG Signal ID {signal_id}' if signal_id else 'ECG Signal')
         
-            # Estilo do gráfico
+            # Estilo MATLAB
+            ax.set_xticks(np.arange(0, duration + 0.1, 2.5))
+            ax.set_yticks(np.arange(-2, 2.5, 0.5))
             ax.grid(False)
-            ax.set_xticks(np.arange(0, duration + 0.001, 2.5))
-            ax.set_yticks(np.arange(np.floor(y_lower), np.ceil(y_upper)+0.001, 0.5))
             plt.tight_layout()
             plt.show()
 
