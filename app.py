@@ -148,8 +148,8 @@ else:
         import altair as alt
         
         sampling_rate = 300  # Hz
-        signal_duration_sec = 30  # duração do sinal (30s)
-        num_samples = sampling_rate * signal_duration_sec  # 9000 amostras para 30s
+        signal_duration_sec = 30  # duração do sinal (30 segundos)
+        num_samples = sampling_rate * signal_duration_sec  # 9000 amostras
         
         ecg_values = ecgs[signal_id][:num_samples]
         time_axis = [i / sampling_rate for i in range(len(ecg_values))]
@@ -159,16 +159,15 @@ else:
             "Amplitude (mV)": ecg_values
         })
         
-        # Calculando a largura ideal em pixels para 30s
-        # 25mm/s * 250px/s para 1s de sinal
-        chart_width = signal_duration_sec * 250  # 30 segundos * 250px/s = 7500px
+        # Ajustando a largura para 30 segundos de sinal (250 px por segundo)
+        chart_width = signal_duration_sec * 250  # 30 segundos * 250px = 7500px
         
-        # Criando o gráfico
+        # Criando o gráfico com uma altura e largura adequadas
         chart = alt.Chart(df).mark_line().encode(
-            x=alt.X("Time (s)", axis=alt.Axis(title="Tempo (s)", grid=True)),
-            y=alt.Y("Amplitude (mV)", axis=alt.Axis(title="Amplitude (mV)", grid=True), scale=alt.Scale(domain=[-2, 2]))
+            x=alt.X("Time (s):Q", axis=alt.Axis(title="Tempo (s)", grid=True)),
+            y=alt.Y("Amplitude (mV):Q", axis=alt.Axis(title="Amplitude (mV)", grid=True), scale=alt.Scale(domain=[-2, 2]))
         ).properties(
-            width=chart_width,  # Ajuste dinâmico de largura
+            width=chart_width,  # Largura calculada de acordo com a duração do sinal
             height=400,
             title=f"ECG Signal ID {signal_id} (30s)"
         )
