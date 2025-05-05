@@ -150,22 +150,18 @@ else:
             duration = len(ecg_signal) / sampling_rate
             time = np.arange(len(ecg_signal)) / sampling_rate
         
-            mm_per_sec = 25
-            mm_per_mV = 10
-        
-            width_inch = (duration * mm_per_sec) / 25.4
-            height_inch = (4 * mm_per_mV) / 25.4
-        
-            fig, ax = plt.subplots(figsize=(width_inch, height_inch))
+            fig, ax = plt.subplots(figsize=(10, 4))  # Tamanho fixo e adequado para Streamlit
         
             ax.plot(time, ecg_signal, color="black", linewidth=0.8)
             ax.set_xlim(0, duration)
             ax.set_ylim(-2, 2)
         
-            ax.set_xticks(np.arange(0, duration, 0.04), minor=True)
-            ax.set_xticks(np.arange(0, duration, 0.2), minor=False)
-            ax.set_yticks(np.arange(-2, 2.1, 0.1), minor=True)
-            ax.set_yticks(np.arange(-2, 2.1, 0.5), minor=False)
+            # Grades menores e maiores
+            ax.set_xticks(np.arange(0, duration, 0.04), minor=True)   # 1 mm = 0.04 s
+            ax.set_xticks(np.arange(0, duration, 0.2), minor=False)   # 5 mm = 0.2 s
+        
+            ax.set_yticks(np.arange(-2, 2.1, 0.1), minor=True)        # 1 mm = 0.1 mV
+            ax.set_yticks(np.arange(-2, 2.1, 0.5), minor=False)       # 5 mm = 0.5 mV
         
             ax.grid(which='minor', color='red', linestyle='-', linewidth=0.3)
             ax.grid(which='major', color='red', linestyle='-', linewidth=0.8)
