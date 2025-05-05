@@ -146,32 +146,49 @@ else:
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
 
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import streamlit as st
+        
         def plot_ecg(ecg_signal, sampling_rate=300, signal_id=""):
+            # Tempo total e vetor tempo
             duration = len(ecg_signal) / sampling_rate
             time = np.arange(len(ecg_signal)) / sampling_rate
         
-            fig, ax = plt.subplots(figsize=(15, 5))
+            # Tamanho do gráfico em polegadas (25 mm/s e 10 mm/mV)
+            mm_per_sec = 25
+            mm_per_mV = 10
+        
+            width_inch = (duration * mm_per_sec) / 25.4  # mm to inches
+            height_inch = (4 * mm_per_mV) / 25.4         # 4 mV de faixa (2 para cima, 2 para baixo)
+        
+            fig, ax = plt.subplots(figsize=(width_inch, height_inch))
+        
+            # ECG plot
             ax.plot(time, ecg_signal, color="black", linewidth=0.8)
         
-            ax.set_facecolor('#fffafa')  # fundo levemente rosado
-            ax.set_xlim(0, 30)  # 30 segundos
-        
-            ax.set_xticks(np.arange(0, 30, 0.04), minor=True)
-            ax.set_xticks(np.arange(0, 30, 0.2), minor=False)
-        
-            ax.set_yticks(np.arange(-2, 2.1, 0.1), minor=True)
-            ax.set_yticks(np.arange(-2, 2.1, 0.5), minor=False)
+            # Limites
+            ax.set_xlim(0, duration)
             ax.set_ylim(-2, 2)
         
-            ax.grid(which='minor', color='red', linestyle='-', linewidth=0.25)
-            ax.grid(which='major', color='red', linestyle='-', linewidth=0.7)
+            # Grades menores (1 mm) e maiores (5 mm)
+            ax.set_xticks(np.arange(0, duration, 0.04), minor=True)   # 1 mm (25 mm/s -> 1mm = 0.04s)
+            ax.set_xticks(np.arange(0, duration, 0.2), minor=False)   # 5 mm = 0.2s
         
-            ax.set_title(f"ECG Signal ID {signal_id} (30s)")
+            ax.set_yticks(np.arange(-2, 2.1, 0.1), minor=True)        # 1 mm = 0.1 mV
+            ax.set_yticks(np.arange(-2, 2.1, 0.5), minor=False)       # 5 mm = 0.5 mV
+        
+            # Grades estilo ECG
+            ax.grid(which='minor', color='red', linestyle='-', linewidth=0.3)
+            ax.grid(which='major', color='red', linestyle='-', linewidth=0.8)
+            ax.set_facecolor('#fffafa')
+        
+            ax.set_title(f"ECG Signal ID {signal_id} (30s)", fontsize=12)
             ax.set_xlabel("Tempo (segundos)")
             ax.set_ylabel("Amplitude (mV)")
         
-            plt.tight_layout()
-            st.pyplot(fig)  # <-- ESSENCIAL NO STREAMLIT
+            st.pyplot(fig)
+
         
 
 
