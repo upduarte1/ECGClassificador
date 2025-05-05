@@ -147,39 +147,38 @@ else:
         # st.line_chart(ecgs[signal_id])
 
 
-        def plot_ecg(ecg_signal, sampling_rate=300, signal_id=""):
-        
+        def plot_ecg_scaled(ecg_signal, sampling_rate=300, signal_id=""):
+
             duration = len(ecg_signal) / sampling_rate
-            time = np.linspace(0, duration, len(ecg_signal))
+            time_sec = np.linspace(0, duration, len(ecg_signal))  # Tempo real em segundos
         
             fig, ax = plt.subplots(figsize=(15, 5), dpi=100)
         
-            # Fundo branco
-            ax.set_facecolor('white')
-        
-            # Grade fina (1 mm) → 0.04s (25 mm/s), 0.1 mV
-            minor_ticks_x = np.arange(0, duration, 0.04)
-            minor_ticks_y = np.arange(-200, 500, 10)
-            ax.set_xticks(minor_ticks_x, minor=True)
-            ax.set_yticks(minor_ticks_y, minor=True)
+            # Grade fina (1 mm = 0.04 s)
+            minor_x = np.arange(0, duration, 0.04)
+            minor_y = np.arange(-500, 1500, 0.1)
+            ax.set_xticks(minor_x, minor=True)
+            ax.set_yticks(minor_y, minor=True)
             ax.grid(which='minor', color='red', linestyle='-', linewidth=0.2)
         
-            # Grade grossa (5 mm) → 0.2s e 0.5mV
-            major_ticks_x = np.arange(0, duration, 0.2)
-            major_ticks_y = np.arange(-200, 500, 50)
-            ax.set_xticks(major_ticks_x)
-            ax.set_yticks(major_ticks_y)
+            # Grade grossa (5 mm = 0.2 s)
+            major_x = np.arange(0, duration, 0.2)
+            major_y = np.arange(-500, 1500, 0.5)
+            ax.set_xticks(major_x)
+            ax.set_yticks(major_y)
             ax.grid(which='major', color='red', linestyle='-', linewidth=0.6)
         
-            # Plot do sinal
-            ax.plot(time, ecg_signal, color='black', linewidth=1)
+            # ECG plot
+            ax.plot(time_sec, ecg_signal, color='black', linewidth=1)
+            ax.set_xlim([0, duration])
+            ax.set_ylim([-1.5, 1.5])  # ou ajusta conforme tua amplitude real
         
-            ax.set_title(f"ECG\n{signal_id}", fontsize=14, weight='bold')
+            ax.set_title(f"ECG Signal ID {signal_id} ({duration:.0f}s)")
             ax.set_xlabel("Tempo (segundos)")
-            ax.set_ylabel("ECG (mV)")
-            ax.set_ylim([-200, 500])
+            ax.set_ylabel("Amplitude (mV)\n[10 mm = 1 mV]")
         
             st.pyplot(fig)
+
 
 
         plot_ecg(ecgs[signal_id], sampling_rate=300, signal_id=signal_id)
