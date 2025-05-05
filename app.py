@@ -170,6 +170,12 @@ else:
         
         st.altair_chart(chart)
 
+        with st.container():
+            st.markdown("<div style='overflow-x: auto;'>", unsafe_allow_html=True)
+            st.altair_chart(chart)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+
 
 
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
