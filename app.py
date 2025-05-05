@@ -148,7 +148,10 @@ else:
         import altair as alt
         
         sampling_rate = 300  # Hz
-        ecg_values = ecgs[signal_id]
+        signal_duration_sec = 30
+        num_samples = sampling_rate * signal_duration_sec  # 9000 samples
+        
+        ecg_values = ecgs[signal_id][:num_samples]
         time_axis = [i / sampling_rate for i in range(len(ecg_values))]
         
         df = pd.DataFrame({
@@ -158,14 +161,15 @@ else:
         
         chart = alt.Chart(df).mark_line().encode(
             x=alt.X("Time (s)", axis=alt.Axis(title="Tempo (s)", grid=True)),
-            y=alt.Y("Amplitude (mV)", scale=alt.Scale(domain=[-2, 2]), axis=alt.Axis(grid=True))
+            y=alt.Y("Amplitude (mV)", axis=alt.Axis(title="Amplitude (mV)", grid=True), scale=alt.Scale(domain=[-2, 2]))
         ).properties(
-            width=len(ecg_values) / sampling_rate * 250,  # 25 mm/s ≈ 250 px/s (assuming 10 px ≈ 1 mm)
-            height=300,
-            title=f"Sinal ECG ID {signal_id}"
+            width=7500,  # 250 px/s * 30s = 7500 px
+            height=400,
+            title=f"ECG Signal ID {signal_id} (30s)"
         )
         
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart)
+
 
 
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
