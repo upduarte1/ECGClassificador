@@ -147,54 +147,57 @@ else:
         # st.line_chart(ecgs[signal_id])
 
        
-        import numpy as np
-        import matplotlib.pyplot as plt
-
         def show_ecg_plot(signal, sampling_frequency=300, signal_id=None):
-            # Verificar e limpar o sinal
+            import matplotlib.pyplot as plt
+            import numpy as np
+        
             signal = np.array(signal, dtype=float)
             signal = signal[np.isfinite(signal)]
         
             if len(signal) == 0:
-                print(f"ECG signal ID {signal_id} is empty or invalid.")
+                st.warning(f"ECG signal ID {signal_id} is empty or invalid.")
                 return
         
-            # Tempo (em segundos)
             t = np.arange(len(signal)) / sampling_frequency
-            duration = 30  # mostrar apenas 30 segundos
+            duration = 30
             samples_to_show = int(duration * sampling_frequency)
             t = t[:samples_to_show]
             signal = signal[:samples_to_show]
         
-            fig, ax = plt.subplots(figsize=(16, 6))
+            # Criar figura e eixos
+            fig, ax = plt.subplots(figsize=(16, 6), dpi=100)
+            ax.set_facecolor("white")
         
-            # Grade ECG (vertical: tempo; horizontal: mV)
-            for x in np.arange(0, duration, 0.2):  # 5 mm (0.2 s)
-                ax.axvline(x, color='red', lw=0.5, alpha=0.4)
-            for x in np.arange(0, duration, 0.04):  # 1 mm (0.04 s)
-                ax.axvline(x, color='red', lw=0.5, alpha=0.1)
+            # Limites e rótulos
+            ax.set_xlim([0, 30])
+            ax.set_ylim([-200, 500])
+            ax.set_xlabel("Tempo (segundos)")
+            ax.set_ylabel("ECG (μV)")
+            ax.set_title(f"ECG Signal ID {signal_id}" if signal_id else "ECG Signal")
         
-            for y in np.arange(-2, 2.5, 0.5):  # 5 mm (0.5 mV)
-                ax.axhline(y, color='red', lw=0.5, alpha=0.4)
-            for y in np.arange(-2, 2.5, 0.1):  # 1 mm (0.1 mV)
-                ax.axhline(y, color='red', lw=0.5, alpha=0.1)
+            # Grade vermelha vertical (tempo)
+            for i in np.arange(0, 30, 0.2):  # 5 mm = 0.2s
+                ax.axvline(i, color='red', linewidth=0.5, alpha=0.3)
+            for i in np.arange(0, 30, 0.04):  # 1 mm = 0.04s
+                ax.axvline(i, color='red', linewidth=0.5, alpha=0.1)
         
-            # Plotar ECG
-            ax.plot(t, signal, color='black', linewidth=1)
+            # Grade vermelha horizontal (amplitude)
+            for i in np.arange(-200, 500, 50):  # 5 mm = 0.5mV ~ 50μV
+                ax.axhline(i, color='red', linewidth=0.5, alpha=0.3)
+            for i in np.arange(-200, 500, 10):  # 1 mm = 0.1mV ~ 10μV
+                ax.axhline(i, color='red', linewidth=0.5, alpha=0.1)
         
-            # Eixos e título
-            ax.set_xlim(0, duration)
-            ax.set_ylim(-2, 2)
-            ax.set_xlabel('Tempo (segundos)')
-            ax.set_ylabel('Amplitude (mV)')
-            ax.set_title(f'ECG Signal ID {signal_id}' if signal_id else 'ECG Signal')
+            # Plotar sinal
+            ax.plot(t, signal, color='black', linewidth=0.8)
         
-            # Estilo MATLAB
-            ax.set_xticks(np.arange(0, duration + 0.1, 2.5))
-            ax.set_yticks(np.arange(-2, 2.5, 0.5))
-            ax.grid(False)
+            # Ticks
+            ax.set_xticks(np.arange(0, 30.1, 2.5))
+            ax.set_yticks(np.arange(-200, 550, 100))
+        
+            # Layout e exibição
             plt.tight_layout()
             st.pyplot(fig)
+
 
 
 
