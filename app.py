@@ -173,10 +173,25 @@ else:
         ax.set_xlabel("Tempo (mm) [25 mm/s]")
         ax.set_ylabel("Amplitude (mV) [10 mm = 1 mV]")
         
+        # Adicionando a grade para simular papel milimétrico
+        # Linhas no eixo X a cada 25 unidades (representando 25 mm/s)
+        ax.grid(which='both', axis='x', linestyle='--', color='gray', linewidth=0.5)
+        
+        # Linhas no eixo Y a cada 10 unidades (representando 10 mm = 1 mV)
+        ax.grid(which='both', axis='y', linestyle='--', color='gray', linewidth=0.5)
+        
+        # Adicionando linhas horizontais e verticais para simular a "grade" do papel milimétrico
+        for x in range(0, int(time_axis_scaled[-1]), 25):  # Cada 25 mm no eixo X
+            ax.axvline(x=x, color='gray', linestyle='--', linewidth=0.5)
+        
+        for y in range(-2, 2, 1):  # Cada 1 mV no eixo Y (10mm)
+            ax.axhline(y=y * 10, color='gray', linestyle='--', linewidth=0.5)
+        
         # Adicionando a rolagem horizontal
         st.markdown("<div style='overflow-x: auto;'>", unsafe_allow_html=True)
         st.pyplot(fig)  # Exibindo o gráfico Matplotlib
         st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 
