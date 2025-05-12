@@ -87,6 +87,12 @@ else:
                 signal_id = int(row["signal_id"])
                 heart_rate = float(row["heart_rate"])
                 ecg_str = row["ecg_signal"]
+
+                # Adição: Ignora se a string contém apenas "-"
+                if ecg_str.strip() == "-" or ecg_str.strip() == "":
+                    raise ValueError("ECG vazio ou inválido")
+
+                
                 values = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
                 ecgs[signal_id] = values
                 heart_rates[signal_id] = heart_rate
