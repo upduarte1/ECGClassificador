@@ -76,29 +76,33 @@ else:
 
     # Load signals from spreadsheet
     def load_signals(sheet):
-        
         records = sheet.get_all_records()
-
         ecgs = {}
         heart_rates = {}
-        
+    
         for row in records:
             try:
                 signal_id = int(row["signal_id"])
                 heart_rate = float(row["heart_rate"])
                 ecg_str = row["ecg_signal"]
-
-                # Adição: Ignora se a string contém apenas "-"
-                if ecg_str.strip() == "-" or ecg_str.strip() == "":
-                    raise ValueError("ECG vazio ou inválido")
-
-                
-                values = [float(v.strip()) for v in ecg_str.split(",") if v.strip()]
+    
+                raw_values = ecg_str.split(",")
+                values = []
+                for v in raw_values:
+                    v = v.strip()
+                    if v == "-" or v == "":
+                        continue  # Ignora traços soltos
+                    values.append(float(v))  # Aceita números negativos normalmente
+    
+                if not values:
+                    raise ValueError("ECG vazio após limpeza")
+    
                 ecgs[signal_id] = values
                 heart_rates[signal_id] = heart_rate
+    
             except Exception as e:
                 st.warning(f"Erro ao processar o sinal {row.get('signal_id', '?')}: {e}")
-                
+    
         return ecgs, heart_rates
 
     # Connect and load data
