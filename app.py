@@ -78,8 +78,6 @@ else:
     def load_signals(sheet):
         
         records = sheet.get_all_records()
-        st.write("📋 Dados brutos da planilha:")
-        st.write(records)
 
         ecgs = {}
         heart_rates = {}
