@@ -71,7 +71,7 @@ else:
         client = gspread.authorize(credentials)
 
         classification_sheet = client.open("ECG Classificações").worksheet("Folha1")
-        signal_sheet = client.open("ecg.xlsx").worksheet("Folha1")
+        signal_sheet = client.open("ecg").worksheet("Folha1")
         return classification_sheet, signal_sheet
 
     # Load signals from spreadsheet
