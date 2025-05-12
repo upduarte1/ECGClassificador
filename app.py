@@ -55,6 +55,43 @@ else:
     st.sidebar.success(f"Welcome, Dr. {user_display_name}")
     role = ROLES.get(username, "unknown")
 
+    # Estatísticas gerais de classificação
+    from collections import Counter
+    
+    classification_labels = [r['classification'] for r in records]
+    total_classifications = len(classification_labels)
+    label_counts = Counter(classification_labels)
+    
+    st.sidebar.markdown("### 📊 Estatísticas Gerais")
+    
+    if total_classifications > 0:
+        for label, count in label_counts.items():
+            percent = (count / total_classifications) * 100
+            st.sidebar.write(f"**{label}**: {count} ({percent:.1f}%)")
+        
+        # Exibir barra de progresso
+        st.sidebar.markdown("### Progresso Total")
+        st.sidebar.progress(total_classifications / len(ecgs))
+    else:
+        st.sidebar.info("Ainda não há classificações registradas.")
+
+    # Gráfico de pizza das classificações
+    import matplotlib.pyplot as plt
+    
+    if total_classifications > 0:
+        fig, ax = plt.subplots(figsize=(4, 4))
+        labels = list(label_counts.keys())
+        sizes = [label_counts[l] for l in labels]
+        colors = plt.cm.Pastel1(np.linspace(0, 1, len(labels)))
+    
+        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140, colors=colors)
+        ax.axis("equal")  # Garantir que o círculo seja redondo
+        ax.set_title("Distribuição de Classificações")
+    
+        st.sidebar.pyplot(fig)
+
+
+
     if st.sidebar.button("Logout"):
         st.session_state.authenticated = False
         st.session_state.username = ""
