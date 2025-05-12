@@ -55,11 +55,6 @@ else:
     st.sidebar.success(f"Welcome, Dr. {user_display_name}")
     role = ROLES.get(username, "unknown")
 
-    
-
-
-
-
     if st.sidebar.button("Logout"):
         st.session_state.authenticated = False
         st.session_state.username = ""
@@ -76,13 +71,16 @@ else:
         client = gspread.authorize(credentials)
 
         classification_sheet = client.open("ECG Classificações").worksheet("Folha1")
-        signal_sheet = client.open("ECG Dados").worksheet("Folha1")
+        signal_sheet = client.open("ecg").worksheet("Folha1")
         return classification_sheet, signal_sheet
 
     # Load signals from spreadsheet
     def load_signals(sheet):
         
         records = sheet.get_all_records()
+        st.write("📋 Dados brutos da planilha:")
+        st.write(records)
+
         ecgs = {}
         heart_rates = {}
         
