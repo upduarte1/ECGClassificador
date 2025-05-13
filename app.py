@@ -74,6 +74,7 @@ else:
         signal_sheet = client.open("ecg").worksheet("Folha1")
         return classification_sheet, signal_sheet
 
+    @st.cache_data(ttl=300)  # cache por 5 minutos
     # Load signals from spreadsheet
     def load_signals(sheet):
         records = sheet.get_all_records()
