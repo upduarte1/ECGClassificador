@@ -71,7 +71,7 @@ else:
         client = gspread.authorize(credentials)
 
         classification_sheet = client.open("ECG Classificações").worksheet("Folha1")
-        signal_sheet = client.open("ecg").worksheet("Folha1")
+        signal_sheet = client.open("ECG Dados").worksheet("Folha1")
         return classification_sheet, signal_sheet
 
     @st.cache_data(ttl=300)  # cache por 5 minutos
