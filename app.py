@@ -112,7 +112,8 @@ else:
 
     # Connect and load data
     classification_sheet, signal_sheet = connect_sheets()
-    ecgs, heart_rates = load_signals(signal_sheet)
+    # ecgs, heart_rates = load_signals(signal_sheet)
+    ecgs, heart_rates = load_signals_from_google_sheets()
     
     # Load all classification records here
     records = classification_sheet.get_all_records()
