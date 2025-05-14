@@ -77,6 +77,14 @@ else:
     @st.cache_data(ttl=300)  # cache por 5 minutos
     # Load signals from spreadsheet
     def load_signals(sheet):
+
+        scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
+        client = gspread.authorize(credentials)
+    
+        sheet = client.open(sheet_name).worksheet(worksheet_name)
+
         records = sheet.get_all_records()
         ecgs = {}
         heart_rates = {}
