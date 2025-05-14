@@ -12,6 +12,9 @@ if "authenticated" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
+st.set_option("client.caching", True)
+st.set_option("server.maxMessageSize", 200_000_000)  # 200 MB
+
 # Authorized users
 USERS = {
     "user1": "1234",
