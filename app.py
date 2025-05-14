@@ -74,18 +74,17 @@ else:
         signal_sheet = client.open("ECG Dados").worksheet("Folha1")
         return classification_sheet, signal_sheet
 
-    @st.cache_data(ttl=300)  # cache por 5 minutos
-    # Load signals from spreadsheet
-    def load_signals(sheet):
-
+    
+    @st.cache_data(ttl=600)
+    def load_signals_from_google_sheets():
         scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
         credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
         client = gspread.authorize(credentials)
     
-        sheet = client.open(sheet_name).worksheet(worksheet_name)
-
+        sheet = client.open("ecg").worksheet("Folha1")
         records = sheet.get_all_records()
+    
         ecgs = {}
         heart_rates = {}
     
@@ -95,19 +94,16 @@ else:
                 heart_rate = float(row["heart_rate"])
                 ecg_str = row["ecg_signal"]
     
-                raw_values = ecg_str.split(",")
                 values = []
-                for v in raw_values:
+                for v in ecg_str.split(","):
                     v = v.strip()
                     if v == "-" or v == "":
-                        continue  # Ignora traços soltos
-                    values.append(float(v))  # Aceita números negativos normalmente
+                        continue
+                    values.append(float(v))
     
-                if not values:
-                    raise ValueError("ECG vazio após limpeza")
-    
-                ecgs[signal_id] = values
-                heart_rates[signal_id] = heart_rate
+                if values:
+                    ecgs[signal_id] = values
+                    heart_rates[signal_id] = heart_rate
     
             except Exception as e:
                 st.warning(f"Erro ao processar o sinal {row.get('signal_id', '?')}: {e}")
