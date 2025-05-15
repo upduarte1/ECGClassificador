@@ -65,6 +65,27 @@ else:
 
     st.title("ECG Signal Classifier")
 
+    @st.cache_data(ttl=600)
+    def get_signal_by_id(signal_id: int):
+        scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
+        client = gspread.authorize(credentials)
+    
+        sheet = client.open("ecg").worksheet("Folha1")
+        cell = sheet.find(str(signal_id))
+        row = sheet.row_values(cell.row)
+    
+        header = sheet.row_values(1)
+        row_data = dict(zip(header, row))
+    
+        ecg_str = row_data["ecg_signal"]
+        heart_rate = float(row_data["heart_rate"])
+        values = [float(v.strip()) for v in ecg_str.split(",") if v.strip() not in ("", "-")]
+    
+        return values, heart_rate
+
+
     # Connect to Google Sheets
     def connect_sheets():
         
@@ -116,8 +137,10 @@ else:
     # Connect and load data
     classification_sheet, signal_sheet = connect_sheets()
     # ecgs, heart_rates = load_signals(signal_sheet)
-    ecgs, heart_rates = load_signals_from_google_sheets()
-    
+    # ecgs, heart_rates = load_signals_from_google_sheets()
+    signal_ids_sheet = signal_sheet.get_all_records()
+    all_signal_ids = [int(row["signal_id"]) for row in signal_ids_sheet]
+
     # Load all classification records here
     records = classification_sheet.get_all_records()
     
@@ -125,9 +148,12 @@ else:
     if role == "classifier":
         
         already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
-        available_signals = [k for k in ecgs if k not in already_classified_ids]
-    
-        total_signals = len(ecgs)
+        # available_signals = [k for k in ecgs if k not in already_classified_ids]
+        # total_signals = len(ecgs)
+
+        available_signals = [sid for sid in all_signal_ids if sid not in already_classified_ids]
+        total_signals = len(all_signal_ids)
+        
         num_classified = len(already_classified_ids)
         st.info(f"📈 Signals classified: {num_classified} / {total_signals}")
     
@@ -221,8 +247,15 @@ else:
 
 
 
-        show_ecg_plot(ecgs[signal_id], sampling_frequency=300, signal_id=signal_id)
-    
+        # show_ecg_plot(ecgs[signal_id], sampling_frequency=300, signal_id=signal_id)
+        try:
+            signal_data, heart_rate = get_signal_by_id(signal_id)
+            show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
+            st.write(f"Heart Rate: {heart_rate} bpm")
+        except Exception as e:
+            st.error(f"Erro ao carregar sinal {signal_id}: {e}")
+            st.stop()
+
         
         st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
 
