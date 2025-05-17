@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 # Authentication state
 if "authenticated" not in st.session_state:
@@ -52,17 +53,6 @@ if not st.session_state.authenticated:
 # Main app after login
 else:
 
-    if st.sidebar.checkbox("📄 Ver minhas classificações anteriores"):
-        user_classifications = [r for r in records if r['cardiologist'] == username]
-        df_user = pd.DataFrame(user_classifications)
-        st.dataframe(df_user)
-
-
-
-
-
-    import pandas as pd
-
     # Upload manual do Excel de sinais
     if "ecg_signals" not in st.session_state:
         st.session_state.ecg_signals = None
@@ -100,6 +90,16 @@ else:
         st.session_state.authenticated = False
         st.session_state.username = ""
         st.rerun()
+
+    if st.sidebar.checkbox("📄 Ver minhas classificações anteriores"):
+        user_classifications = [r for r in records if r['cardiologist'] == username]
+        if user_classifications:
+            import pandas as pd
+            df_user = pd.DataFrame(user_classifications)
+            st.subheader("📄 Minhas classificações")
+            st.dataframe(df_user)
+        else:
+            st.info("Você ainda não fez nenhuma classificação.")
 
     st.title("ECG Signal Classifier")
 
