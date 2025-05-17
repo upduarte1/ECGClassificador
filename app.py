@@ -51,8 +51,9 @@ if not st.session_state.authenticated:
 
 # Main app after login
 else:
-    
-   import pandas as pd
+
+    import pandas as pd
+
     # Upload manual do Excel de sinais
     if "ecg_signals" not in st.session_state:
         st.session_state.ecg_signals = None
@@ -74,14 +75,12 @@ else:
     
     df_ecg = st.session_state.ecg_signals
     required_columns = {"signal_id", "ecg_signal", "heart_rate"}
+    
     if not required_columns.issubset(df_ecg.columns):
         st.error("O arquivo Excel deve conter as colunas: 'signal_id', 'ecg_signal' e 'heart_rate'")
         st.stop()
     
     all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
-
-
-
     
     username = st.session_state.username
     user_display_name = username.title()
