@@ -52,6 +52,15 @@ if not st.session_state.authenticated:
 # Main app after login
 else:
 
+    if st.sidebar.checkbox("📄 Ver minhas classificações anteriores"):
+    user_classifications = [r for r in records if r['cardiologist'] == username]
+    df_user = pd.DataFrame(user_classifications)
+    st.dataframe(df_user)
+
+
+
+
+
     import pandas as pd
 
     # Upload manual do Excel de sinais
@@ -93,6 +102,9 @@ else:
         st.rerun()
 
     st.title("ECG Signal Classifier")
+
+    progress_ratio = num_classified / total_signals
+    st.progress(progress_ratio)
 
     def get_signal_by_id(signal_id: int):
         row = df_ecg[df_ecg["signal_id"] == signal_id]
