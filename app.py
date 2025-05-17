@@ -51,23 +51,36 @@ if not st.session_state.authenticated:
 
 # Main app after login
 else:
-    import pandas as pd
     
-    # Upload manual do CSV de sinais
+   import pandas as pd
+    # Upload manual do Excel de sinais
     if "ecg_signals" not in st.session_state:
         st.session_state.ecg_signals = None
     
     st.subheader("📥 Upload de Sinais ECG")
-    uploaded_file = st.file_uploader("Carregue o arquivo CSV com os sinais ECG", type=["csv"])
+    uploaded_file = st.file_uploader("Carregue o arquivo Excel com os sinais ECG (.xlsx)", type=["xlsx"])
     
     if uploaded_file is not None:
         try:
-            df = pd.read_csv(uploaded_file)
+            df = pd.read_excel(uploaded_file)
             st.session_state.ecg_signals = df
             st.success("Arquivo carregado com sucesso!")
         except Exception as e:
-            st.error(f"Erro ao carregar arquivo: {e}")
+            st.error(f"Erro ao carregar arquivo Excel: {e}")
             st.stop()
+    if st.session_state.ecg_signals is None:
+        st.warning("Por favor, carregue o arquivo com os sinais ECG para continuar.")
+        st.stop()
+    
+    df_ecg = st.session_state.ecg_signals
+    required_columns = {"signal_id", "ecg_signal", "heart_rate"}
+    if not required_columns.issubset(df_ecg.columns):
+        st.error("O arquivo Excel deve conter as colunas: 'signal_id', 'ecg_signal' e 'heart_rate'")
+        st.stop()
+    
+    all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
+
+
 
     
     username = st.session_state.username
