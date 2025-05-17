@@ -103,8 +103,6 @@ else:
 
     st.title("ECG Signal Classifier")
 
-    progress_ratio = num_classified / total_signals
-    st.progress(progress_ratio)
 
     def get_signal_by_id(signal_id: int):
         row = df_ecg[df_ecg["signal_id"] == signal_id]
@@ -197,6 +195,9 @@ else:
         
         num_classified = len(already_classified_ids)
         st.info(f"📈 Signals classified: {num_classified} / {total_signals}")
+      
+        progress_ratio = num_classified / total_signals
+        st.progress(progress_ratio)
     
     elif role == "reviewer":
         
