@@ -91,16 +91,6 @@ else:
         st.session_state.username = ""
         st.rerun()
 
-    if st.sidebar.checkbox("📄 Ver minhas classificações anteriores"):
-        user_classifications = [r for r in records if r['cardiologist'] == username]
-        if user_classifications:
-            import pandas as pd
-            df_user = pd.DataFrame(user_classifications)
-            st.subheader("📄 Minhas classificações")
-            st.dataframe(df_user)
-        else:
-            st.info("Você ainda não fez nenhuma classificação.")
-
     st.title("ECG Signal Classifier")
 
 
@@ -182,6 +172,16 @@ else:
     
     # Load all classification records here
     records = classification_sheet.get_all_records()
+
+    if st.sidebar.checkbox("📄 Ver minhas classificações anteriores"):
+        user_classifications = [r for r in records if r['cardiologist'] == username]
+        if user_classifications:
+            import pandas as pd
+            df_user = pd.DataFrame(user_classifications)
+            st.subheader("📄 Minhas classificações")
+            st.dataframe(df_user)
+        else:
+            st.info("Você ainda não fez nenhuma classificação.")
     
     # Select signals based on user role
     if role == "classifier":
