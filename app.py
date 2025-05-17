@@ -14,7 +14,6 @@ if "username" not in st.session_state:
 
 # st.set_option("server.maxMessageSize", 200_000_000)  # 200 MB
 
-
 # Authorized users
 USERS = {
     "user1": "1234",
@@ -52,6 +51,24 @@ if not st.session_state.authenticated:
 
 # Main app after login
 else:
+    import pandas as pd
+    
+    # Upload manual do CSV de sinais
+    if "ecg_signals" not in st.session_state:
+        st.session_state.ecg_signals = None
+    
+    st.subheader("📥 Upload de Sinais ECG")
+    uploaded_file = st.file_uploader("Carregue o arquivo CSV com os sinais ECG", type=["csv"])
+    
+    if uploaded_file is not None:
+        try:
+            df = pd.read_csv(uploaded_file)
+            st.session_state.ecg_signals = df
+            st.success("Arquivo carregado com sucesso!")
+        except Exception as e:
+            st.error(f"Erro ao carregar arquivo: {e}")
+            st.stop()
+
     
     username = st.session_state.username
     user_display_name = username.title()
@@ -65,39 +82,27 @@ else:
 
     st.title("ECG Signal Classifier")
 
-    @st.cache_data(ttl=600)
     def get_signal_by_id(signal_id: int):
-        scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
-        client = gspread.authorize(credentials)
-    
-        sheet = client.open("ecg").worksheet("Folha1")
-        cell = sheet.find(str(signal_id))
-        row = sheet.row_values(cell.row)
-    
-        header = sheet.row_values(1)
-        row_data = dict(zip(header, row))
-    
-        ecg_str = row_data["ecg_signal"]
-        heart_rate = float(row_data["heart_rate"])
-        values = [float(v.strip()) for v in ecg_str.split(",") if v.strip() not in ("", "-")]
+        row = df_ecg[df_ecg["signal_id"] == signal_id]
+        if row.empty:
+            raise ValueError(f"Sinal com ID {signal_id} não encontrado.")
+        
+        ecg_str = row.iloc[0]["ecg_signal"]
+        heart_rate = float(row.iloc[0]["heart_rate"])
+        values = [float(v.strip()) for v in str(ecg_str).split(",") if v.strip() not in ("", "-")]
     
         return values, heart_rate
 
-
     # Connect to Google Sheets
     def connect_sheets():
-        
         scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
         credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
         client = gspread.authorize(credentials)
 
         classification_sheet = client.open("ECG Classificações").worksheet("Folha1")
-        signal_sheet = client.open("ecg").worksheet("Folha1")
-        return classification_sheet, signal_sheet
-
+        # signal_sheet = client.open("ecg").worksheet("Folha1")
+        return classification_sheet
     
     @st.cache_data(ttl=600)
     def load_signals_from_google_sheets():
@@ -135,12 +140,24 @@ else:
         return ecgs, heart_rates
 
     # Connect and load data
-    classification_sheet, signal_sheet = connect_sheets()
+    classification_sheet = connect_sheets()
     # ecgs, heart_rates = load_signals(signal_sheet)
     # ecgs, heart_rates = load_signals_from_google_sheets()
-    signal_ids_sheet = signal_sheet.get_all_records()
-    all_signal_ids = [int(row["signal_id"]) for row in signal_ids_sheet]
+    # signal_ids_sheet = signal_sheet.get_all_records()
+    # all_signal_ids = [int(row["signal_id"]) for row in signal_ids_sheet]
 
+    if st.session_state.ecg_signals is None:
+        st.warning("Por favor, carregue o arquivo com os sinais ECG para continuar.")
+        st.stop()
+    
+    df_ecg = st.session_state.ecg_signals
+    if "signal_id" not in df_ecg.columns or "ecg_signal" not in df_ecg.columns or "heart_rate" not in df_ecg.columns:
+        st.error("O arquivo CSV deve conter as colunas: signal_id, ecg_signal, heart_rate")
+        st.stop()
+    
+    all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
+
+    
     # Load all classification records here
     records = classification_sheet.get_all_records()
     
