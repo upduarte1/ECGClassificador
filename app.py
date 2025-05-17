@@ -53,9 +53,9 @@ if not st.session_state.authenticated:
 else:
 
     if st.sidebar.checkbox("📄 Ver minhas classificações anteriores"):
-    user_classifications = [r for r in records if r['cardiologist'] == username]
-    df_user = pd.DataFrame(user_classifications)
-    st.dataframe(df_user)
+        user_classifications = [r for r in records if r['cardiologist'] == username]
+        df_user = pd.DataFrame(user_classifications)
+        st.dataframe(df_user)
 
 
 
