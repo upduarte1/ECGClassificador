@@ -170,15 +170,15 @@ else:
     # Load all classification records here
     records = classification_sheet.get_all_records()
 
-    if st.sidebar.checkbox("📄 See my previous classifications"):
-        user_classifications = [r for r in records if r['cardiologist'] == username]
-        if user_classifications:
-            import pandas as pd
-            df_user = pd.DataFrame(user_classifications)
-            st.subheader("📄 My classifications")
-            st.dataframe(df_user)
-        else:
-            st.info("You haven't done any classification.")
+    # if st.sidebar.checkbox("📄 See my previous classifications"):
+    #    user_classifications = [r for r in records if r['cardiologist'] == username]
+    #    if user_classifications:
+    #        import pandas as pd
+    #        df_user = pd.DataFrame(user_classifications)
+    #        st.subheader("📄 My classifications")
+    #        st.dataframe(df_user)
+    #    else:
+    #       st.info("You haven't done any classification.")
     
     # Select signals based on user role
     if role == "classifier":
