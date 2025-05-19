@@ -13,8 +13,6 @@ if "authenticated" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
-# st.set_option("server.maxMessageSize", 200_000_000)  # 200 MB
-
 # Authorized users
 USERS = {
     "user1": "1234",
@@ -57,26 +55,26 @@ else:
     if "ecg_signals" not in st.session_state:
         st.session_state.ecg_signals = None
     
-    st.subheader("📥 Upload de Sinais ECG")
-    uploaded_file = st.file_uploader("Carregue o arquivo Excel com os sinais ECG (.xlsx)", type=["xlsx"])
+    st.subheader("📥 Upload ECGs File")
+    uploaded_file = st.file_uploader("Load the ECG signals file (.xlsx)", type=["xlsx"])
     
     if uploaded_file is not None:
         try:
             df = pd.read_excel(uploaded_file)
             st.session_state.ecg_signals = df
-            st.success("Arquivo carregado com sucesso!")
+            st.success("File loaded with success!")
         except Exception as e:
-            st.error(f"Erro ao carregar arquivo Excel: {e}")
+            st.error(f"Error loading ECG file: {e}")
             st.stop()
     if st.session_state.ecg_signals is None:
-        st.warning("Por favor, carregue o arquivo com os sinais ECG para continuar.")
+        st.warning("Please, load the excel file with the ECGs to continue.")
         st.stop()
     
     df_ecg = st.session_state.ecg_signals
     required_columns = {"signal_id", "ecg_signal", "heart_rate"}
     
     if not required_columns.issubset(df_ecg.columns):
-        st.error("O arquivo Excel deve conter as colunas: 'signal_id', 'ecg_signal' e 'heart_rate'")
+        st.error("Excel file should have the following columns: 'signal_id', 'ecg_signal' e 'heart_rate'")
         st.stop()
     
     all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
@@ -93,11 +91,10 @@ else:
 
     st.title("ECG Signal Classifier")
 
-
     def get_signal_by_id(signal_id: int):
         row = df_ecg[df_ecg["signal_id"] == signal_id]
         if row.empty:
-            raise ValueError(f"Sinal com ID {signal_id} não encontrado.")
+            raise ValueError(f"Signal with ID {signal_id} not found.")
         
         ecg_str = row.iloc[0]["ecg_signal"]
         heart_rate = float(row.iloc[0]["heart_rate"])
@@ -147,7 +144,7 @@ else:
                     heart_rates[signal_id] = heart_rate
     
             except Exception as e:
-                st.warning(f"Erro ao processar o sinal {row.get('signal_id', '?')}: {e}")
+                st.warning(f"Error processing signal {row.get('signal_id', '?')}: {e}")
     
         return ecgs, heart_rates
 
@@ -173,15 +170,15 @@ else:
     # Load all classification records here
     records = classification_sheet.get_all_records()
 
-    if st.sidebar.checkbox("📄 Ver minhas classificações anteriores"):
+    if st.sidebar.checkbox("📄 See my previous classifications"):
         user_classifications = [r for r in records if r['cardiologist'] == username]
         if user_classifications:
             import pandas as pd
             df_user = pd.DataFrame(user_classifications)
-            st.subheader("📄 Minhas classificações")
+            st.subheader("📄 My classifications")
             st.dataframe(df_user)
         else:
-            st.info("Você ainda não fez nenhuma classificação.")
+            st.info("You haven't done any classification.")
     
     # Select signals based on user role
     if role == "classifier":
@@ -259,7 +256,7 @@ else:
             # Limites e rótulos
             ax.set_xlim([0, 30])
             ax.set_ylim([-200, 500])
-            ax.set_xlabel("Tempo (segundos)")
+            ax.set_xlabel("Time (s)")
             ax.set_ylabel("ECG (μV)")
             ax.set_title(f"ECG Signal ID {signal_id}" if signal_id else "ECG Signal")
         
@@ -286,10 +283,6 @@ else:
             plt.tight_layout()
             st.pyplot(fig)
 
-
-
-
-        # show_ecg_plot(ecgs[signal_id], sampling_frequency=300, signal_id=signal_id)
         try:
             signal_data, heart_rate = get_signal_by_id(signal_id)
             show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
@@ -298,13 +291,8 @@ else:
             st.error(f"Erro ao carregar sinal {signal_id}: {e}")
             st.stop()
 
-        
-        # st.write(f"Heart Rate: {heart_rates[signal_id]} bpm")
-
-        # st.write("Classify this signal:")
         col1, col2, col3, col4 = st.columns(4)
-
-        # Classification buttons
+        
         def select_label(label):
             st.session_state.temp_label = label
 
