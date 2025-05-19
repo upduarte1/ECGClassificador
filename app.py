@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+
 # Authentication state
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
