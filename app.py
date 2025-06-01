@@ -251,7 +251,7 @@ else:
             signal = signal[:samples_to_show]
         
             # Criar figura e eixos
-            fig, ax = plt.subplots(figsize=(16, 6), dpi=100)
+            fig, ax = plt.subplots(figsize=(30, 6), dpi=100)
             ax.set_facecolor("white")
         
             # Limites e rótulos
