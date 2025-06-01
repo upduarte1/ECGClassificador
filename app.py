@@ -296,6 +296,15 @@ else:
         
             # Layout e exibição
             plt.tight_layout()
+
+
+                # Save to buffer and display as image for best quality
+            buf = io.BytesIO()
+            fig.savefig(buf, format="png", dpi=dpi, bbox_inches='tight')
+            buf.seek(0)
+            st.image(buf, caption="ECG Signal", use_column_width=True)
+
+    
             st.pyplot(fig)
 
         try:
