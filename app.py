@@ -252,21 +252,18 @@ else:
         
             # Criar figura e eixos
             # fig, ax = plt.subplots(figsize=(30, 6), dpi=100)
+            # 25 mm/s scaling:
+            # At 100 dpi, 1 inch = 25.4 mm → 25 mm = 0.984 inches per second
+            # 30 seconds → ~29.5 inches width
             seconds = 30
-            mm_per_second = 25   # fixed scale on time axis (25 mm/s)
-            
-            amplitude_min = -200
-            amplitude_max = 500
-            amplitude_range_uv = amplitude_max - amplitude_min  # 700 µV range
-            mm_per_1000uv = 10    # 10 mm = 1 mV (1000 µV)
-            
-            # Calculate figure size in inches based on ECG scale
-            fig_width = seconds * (mm_per_second / 25.4)  # 25.4 mm = 1 inch
-            fig_height = (amplitude_range_uv * (mm_per_1000uv / 1000)) / 25.4
-            
-            dpi = 200  # or any you prefer
-            
-            fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=dpi)
+            mm_per_second = 25
+            dpi = 100
+            inches_per_second = mm_per_second / 25.4  # ≈ 0.984
+        
+            width_in_inches = seconds * inches_per_second  # ~29.5
+            height_in_inches = 6  # You can adjust for aesthetics
+        
+            fig, ax = plt.subplots(figsize=(width_in_inches, height_in_inches), dpi=dpi)
 
 
             ax.set_facecolor("white")
