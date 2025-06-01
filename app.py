@@ -243,7 +243,7 @@ else:
             if len(signal) == 0:
                 st.warning(f"ECG signal ID {signal_id} is empty or invalid.")
                 return
-        
+                        
             t = np.arange(len(signal)) / sampling_frequency
             duration = 30
             samples_to_show = int(duration * sampling_frequency)
@@ -252,6 +252,7 @@ else:
         
             # Criar figura e eixos
             # fig, ax = plt.subplots(figsize=(30, 6), dpi=100)
+            seconds = 30
             mm_per_second = 25
             dpi = 100
             inches_per_second = mm_per_second / 25.4  # ≈ 0.984
