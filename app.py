@@ -251,7 +251,13 @@ else:
             signal = signal[:samples_to_show]
         
             # Criar figura e eixos
-            fig, ax = plt.subplots(figsize=(30, 6), dpi=100)
+            # fig, ax = plt.subplots(figsize=(30, 6), dpi=100)
+            mm_per_second = 25
+            dpi = 100
+            inches_per_second = mm_per_second / 25.4  # ≈ 0.984
+            width_in_inches = seconds * inches_per_second  # 30s * 0.984
+            fig, ax = plt.subplots(figsize=(width_in_inches, height_in_inches), dpi=dpi)
+
             ax.set_facecolor("white")
         
             # Limites e rótulos
