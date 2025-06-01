@@ -263,7 +263,7 @@ else:
             width_in_inches = seconds * inches_per_second  # ~29.5
             height_in_inches = 6  # You can adjust for aesthetics
         
-            fig, ax = plt.subplots(figsize=(width_in_inches, height_in_inches), dpi=dpi)
+            fig, ax = plt.subplots(figsize=(width_in_inches, height_in_inches), dpi=200)
 
 
             ax.set_facecolor("white")
