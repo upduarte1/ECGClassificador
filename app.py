@@ -252,11 +252,17 @@ else:
         
             # Criar figura e eixos
             # fig, ax = plt.subplots(figsize=(30, 6), dpi=100)
+                # 25 mm/s scaling:
+            # At 100 dpi, 1 inch = 25.4 mm → 25 mm = 0.984 inches per second
+            # 30 seconds → ~29.5 inches width
             seconds = 30
             mm_per_second = 25
             dpi = 100
             inches_per_second = mm_per_second / 25.4  # ≈ 0.984
-            width_in_inches = seconds * inches_per_second  # 30s * 0.984
+        
+            width_in_inches = seconds * inches_per_second  # ~29.5
+            height_in_inches = 6  # You can adjust for aesthetics
+        
             fig, ax = plt.subplots(figsize=(width_in_inches, height_in_inches), dpi=dpi)
 
             ax.set_facecolor("white")
