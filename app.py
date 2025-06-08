@@ -354,7 +354,7 @@ else:
             # show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
             row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
-            st.markdown("### Signal Features:")
+            st.markdown("### Signal Features")
             # Garantir formatação
             date_only = row_info["date"]
             if isinstance(date_only, str):
