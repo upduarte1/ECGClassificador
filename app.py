@@ -283,7 +283,7 @@ else:
             buf = io.BytesIO()
             fig.savefig(buf, format="png", dpi=dpi, bbox_inches='tight')
             buf.seek(0)
-            st.image(buf, caption="ECG Signal", use_container_width=True)
+            st.image(buf, use_container_width=True)
 
 
         def show_ecg_plot(signal, sampling_frequency=300, signal_id=None):
@@ -354,17 +354,17 @@ else:
             # show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
             row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
-            st.markdown("### 📈 Parâmetros extraídos do sinal")
-            st.write({
-                "Date": row_info["date"],
-                "Heart rate": row_info["heart_rate"],
-                "Num beats": row_info["num_beats"],
-                "Mean BPM": row_info["mean_bpm"],
-                "SDNN": row_info["sdnn"],
-                "RMSSD": row_info["rmssd"],
-                "ApEn": row_info["ap_entropy"],
-                "SNR Index": row_info["snr_index"],
-            })
+            st.markdown("### Signal Features:")
+            st.markdown(f"""
+            - **Data:** {row_info["date"]}
+            - **Frequência Cardíaca:** {row_info["heart_rate"]} bpm
+            - **Número de Batimentos:** {row_info["num_beats"]}
+            - **Média de BPM:** {row_info["mean_bpm"]}
+            - **SDNN:** {row_info["sdnn"]}
+            - **RMSSD:** {row_info["rmssd"]}
+            - **Entropia de Aproximação (ApEn):** {row_info["ap_entropy"]}
+            - **Índice SNR:** {row_info["snr_index"]}
+            """)
             
         except Exception as e:
             st.error(f"Erro ao carregar sinal {signal_id}: {e}")
