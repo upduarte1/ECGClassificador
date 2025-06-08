@@ -72,7 +72,8 @@ else:
         st.stop()
     
     df_ecg = st.session_state.ecg_signals
-    required_columns = {"signal_id", "ecg_signal", "heart_rate"}
+    # required_columns = {"signal_id", "ecg_signal", "heart_rate"}
+    required_columns = {"signal_id", "ecg_signal", "heart_rate", "date", "num_beats", "mean_bpm", "sdnn", "rmssd", "ap_entropy", "snr_index"}
     
     if not required_columns.issubset(df_ecg.columns):
         st.error("Excel file should have the following columns: 'signal_id', 'ecg_signal' e 'heart_rate'")
@@ -352,7 +353,18 @@ else:
             signal_data, heart_rate = get_signal_by_id(signal_id)
             # show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
-            st.write(f"Heart Rate: {heart_rate} bpm")
+            row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
+            st.markdown("### 📈 Parâmetros extraídos do sinal")
+            st.write({
+                "Date": row_info["date],
+                "Heart rate": row_info["heart_rate"],
+                "Num beats": row_info["num_beats"],
+                "Mean BPM": row_info["mean_bpm"],
+                "SDNN": row_info["sdnn"],
+                "RMSSD": row_info["rmssd"],
+                "ApEn": row_info["ap_entropy"],
+                "SNR Index": row_info["snr_index"],
+            })
             
         except Exception as e:
             st.error(f"Erro ao carregar sinal {signal_id}: {e}")
