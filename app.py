@@ -365,10 +365,10 @@ else:
             st.markdown(f"""
             - **Data:** {date_only}
             - **Mean Heart Rate (withings):** {row_info["heart_rate"]} bpm
-            - **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))}
+            - **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))} bpm
             - **Number of Beats:** {row_info["num_beats"]}
-            - **SDNN:** {round(row_info["sdnn"], 2)}
-            - **RMSSD:** {round(row_info["rmssd"], 2)}
+            - **SDNN:** {round(row_info["sdnn"], 2)} s
+            - **RMSSD:** {round(row_info["rmssd"], 2)} s
             - **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
             - **SNR Index:** {round(row_info["snr_index"], 2)}
             """)
