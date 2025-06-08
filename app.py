@@ -257,8 +257,9 @@ else:
             for i in range(3):
                 start = i * 10 * sampling_frequency
                 end = (i + 1) * 10 * sampling_frequency
-                t_segment = np.arange(0, 10, 1 / sampling_frequency)
                 s_segment = signal[start:end]
+                t_segment = np.arange(len(s_segment)) / sampling_frequency
+
         
                 ax = axs[i]
                 ax.plot(t_segment, s_segment, color='black', linewidth=0.8)
