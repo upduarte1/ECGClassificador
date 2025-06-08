@@ -379,7 +379,7 @@ else:
 
         try:
             signal_data, heart_rate = get_signal_by_id(signal_id)
-            show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
+            # show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
             st.write(f"Heart Rate: {heart_rate} bpm")
         except Exception as e:
