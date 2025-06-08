@@ -262,8 +262,8 @@ else:
 
                 ax = axs[i]
                 ax.plot(t_segment, s_segment, color='black', linewidth=0.8)
-                # ax.set_xlim([0, 10])
-                ax.set_xlim([i * 10, (i + 1) * 10])
+                ax.set_xlim([0, 10])
+                #ax.set_xlim([i * 10, (i + 1) * 10])
                 ax.set_ylim([-1500, 1500])
                 ax.set_facecolor("white")
         
