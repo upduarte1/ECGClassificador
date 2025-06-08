@@ -232,7 +232,7 @@ else:
         st.subheader(f"Signal ID: {signal_id}")
         # st.line_chart(ecgs[signal_id])
 
-        def show_ecg_plot(signal, sampling_frequency=300, signal_id=None, duration=30):
+        def show_ecg_plotttt(signal, sampling_frequency=300, signal_id=None, duration=30):
             signal = np.array(signal, dtype=float)
             signal = signal[np.isfinite(signal)]
         
@@ -298,8 +298,6 @@ else:
 
 
         def show_ecg_plot(signal, sampling_frequency=300, signal_id=None):
-            import matplotlib.pyplot as plt
-            import numpy as np
         
             signal = np.array(signal, dtype=float)
             signal = signal[np.isfinite(signal)]
