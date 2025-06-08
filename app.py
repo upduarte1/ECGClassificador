@@ -265,11 +265,14 @@ else:
                 ax.set_xlim([0, 10])
                 ax.set_xlim([i * 10, (i + 1) * 10])
                 ax.set_ylim([-1500, 1500])
+                
                 ax.set_facecolor("white")
         
                 # Ticks e rótulos
                 ax.set_xticks(np.arange(i * 10, (i + 1) * 10 + 1, 1))
                 ax.set_yticks(np.arange(-1500, 1601, 500))
+
+                ax.set_yticklabels([])
         
                 if i == 2:
                     ax.set_xlabel("Tempo (s)")
