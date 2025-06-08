@@ -364,13 +364,13 @@ else:
             
             st.markdown(f"""
             - **Data:** {date_only}
-            - **Frequência Cardíaca:** {row_info["heart_rate"]} bpm
-            - **Número de Batimentos:** {row_info["num_beats"]}
-            - **Média de BPM:** {int(round(row_info["mean_bpm"]))}
+            - **Mean Heart Rate (withings):** {row_info["heart_rate"]} bpm
+            - **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))}
+            - **Number of Beats:** {row_info["num_beats"]}
             - **SDNN:** {round(row_info["sdnn"], 2)}
             - **RMSSD:** {round(row_info["rmssd"], 2)}
-            - **Entropia de Aproximação (ApEn):** {round(row_info["ap_entropy"], 2)}
-            - **Índice SNR:** {round(row_info["snr_index"], 2)}
+            - **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
+            - **SNR Index:** {round(row_info["snr_index"], 2)}
             """)
             
         except Exception as e:
