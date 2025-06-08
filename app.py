@@ -261,14 +261,14 @@ else:
                 t_segment = np.arange(len(s_segment)) / sampling_frequency + i * 10
 
                 ax = axs[i]
-                ax.plot(t_segment, s_segment, color='black', linewidth=0.8)
+                ax.plot(t_segment + i * 10, s_segment, color='black', linewidth=0.8)
                 ax.set_xlim([0, 10])
-                #ax.set_xlim([i * 10, (i + 1) * 10])
+                ax.set_xlim([i * 10, (i + 1) * 10])
                 ax.set_ylim([-1500, 1500])
                 ax.set_facecolor("white")
         
                 # Ticks e rótulos
-                ax.set_xticks(np.arange(0, 11, 1))
+                ax.set_xticks(np.arange(i * 10, (i + 1) * 10 + 1, 1))
                 ax.set_yticks(np.arange(-1500, 1601, 500))
         
                 if i == 2:
