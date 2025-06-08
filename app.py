@@ -258,7 +258,7 @@ else:
                 start = i * 10 * sampling_frequency
                 end = (i + 1) * 10 * sampling_frequency
                 s_segment = signal[start:end]
-                t_segment = np.arange(len(s_segment)) / sampling_frequency
+                t_segment = np.arange(len(s_segment)) / sampling_frequency + i * 10
 
         
                 ax = axs[i]
@@ -266,11 +266,13 @@ else:
                 ax.set_xlim([0, 10])
                 ax.set_ylim([-1500, 1500])
                 ax.set_facecolor("white")
-        
-                # Ticks e rótulos
-                ax.set_xticks(np.arange(0, 11, 1))
+
+                
+                # Ticks
+                ax.set_xticks(np.arange(i * 10, (i + 1) * 10 + 1, 1))
                 ax.set_yticks(np.arange(-1500, 1601, 500))
-        
+                ax.set_yticklabels([])
+                
                 if i == 2:
                     ax.set_xlabel("Tempo (s)")
                 if i == 1:
@@ -294,7 +296,7 @@ else:
             buf = io.BytesIO()
             fig.savefig(buf, format="png", dpi=dpi, bbox_inches='tight')
             buf.seek(0)
-            st.image(buf, caption="ECG Signal", use_column_width=True)
+            st.image(buf, caption="ECG Signal", use_container_width=True)
 
         def show_ecg_plot(signal, sampling_frequency=300, signal_id=None):
             import matplotlib.pyplot as plt
@@ -372,7 +374,7 @@ else:
 
         try:
             signal_data, heart_rate = get_signal_by_id(signal_id)
-            # show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
+            show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
             st.write(f"Heart Rate: {heart_rate} bpm")
         except Exception as e:
