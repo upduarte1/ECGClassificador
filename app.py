@@ -277,9 +277,14 @@ else:
                     ax.set_ylabel("ECG (μV)")
         
                 # Grade vermelha (padrão 1 mm e 5 mm)
-                for j in np.arange(0, 10, 0.2):  # 5 mm = 0.2s
+                # for j in np.arange(0, 10, 0.2):  # 5 mm = 0.2s
+                #     ax.axvline(j, color='red', linewidth=0.5, alpha=0.3)
+                # for j in np.arange(0, 10, 0.04):  # 1 mm = 0.04s
+                #     ax.axvline(j, color='red', linewidth=0.5, alpha=0.1)
+
+                for j in np.arange(i * 10, (i + 1) * 10, 0.2):  # vertical grid lines (5mm = 0.2s)
                     ax.axvline(j, color='red', linewidth=0.5, alpha=0.3)
-                for j in np.arange(0, 10, 0.04):  # 1 mm = 0.04s
+                for j in np.arange(i * 10, (i + 1) * 10, 0.04):  # vertical grid lines (1mm = 0.04s)
                     ax.axvline(j, color='red', linewidth=0.5, alpha=0.1)
         
                 for j in np.arange(-1500, 1600, 500):  # 5 mm = 0.5 mV = 500 μV
@@ -294,7 +299,7 @@ else:
             buf = io.BytesIO()
             fig.savefig(buf, format="png", dpi=dpi, bbox_inches='tight')
             buf.seek(0)
-            st.image(buf, caption="ECG Signal", use_column_width=True)
+            st.image(buf, caption="ECG Signal", use_container_width=True)
 
 
         def show_ecg_plot(signal, sampling_frequency=300, signal_id=None):
