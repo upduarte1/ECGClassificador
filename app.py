@@ -356,7 +356,7 @@ else:
             row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
             st.markdown("### 📈 Parâmetros extraídos do sinal")
             st.write({
-                "Date": row_info["date],
+                "Date": row_info["date"],
                 "Heart rate": row_info["heart_rate"],
                 "Num beats": row_info["num_beats"],
                 "Mean BPM": row_info["mean_bpm"],
