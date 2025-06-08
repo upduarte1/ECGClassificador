@@ -157,42 +157,29 @@ else:
     # all_signal_ids = [int(row["signal_id"]) for row in signal_ids_sheet]
 
     if st.session_state.ecg_signals is None:
-        st.warning("Por favor, carregue o arquivo com os sinais ECG para continuar.")
+        st.warning("Please, load the ECG file to continue.")
         st.stop()
     
     df_ecg = st.session_state.ecg_signals
     if "signal_id" not in df_ecg.columns or "ecg_signal" not in df_ecg.columns or "heart_rate" not in df_ecg.columns:
-        st.error("O arquivo CSV deve conter as colunas: signal_id, ecg_signal, heart_rate")
+        st.error("The file should contain the columns: signal_id, ecg_signal, heart_rate")
         st.stop()
     
     all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
 
-    
     # Load all classification records here
     records = classification_sheet.get_all_records()
-
-    # if st.sidebar.checkbox("📄 See my previous classifications"):
-    #    user_classifications = [r for r in records if r['cardiologist'] == username]
-    #    if user_classifications:
-    #        import pandas as pd
-    #        df_user = pd.DataFrame(user_classifications)
-    #        st.subheader("📄 My classifications")
-    #        st.dataframe(df_user)
-    #    else:
-    #       st.info("You haven't done any classification.")
     
     # Select signals based on user role
     if role == "classifier":
         
         already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
-        # available_signals = [k for k in ecgs if k not in already_classified_ids]
-        # total_signals = len(ecgs)
 
         available_signals = [sid for sid in all_signal_ids if sid not in already_classified_ids]
         total_signals = len(all_signal_ids)
         
         num_classified = len(already_classified_ids)
-        st.info(f"📈 Signals classified: {num_classified} / {total_signals}")
+        st.info(f"Signals classified: {num_classified} / {total_signals}")
       
         progress_ratio = num_classified / total_signals
         st.progress(progress_ratio)
@@ -217,7 +204,7 @@ else:
         already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
         num_reviewed = len([sid for sid in conflicting_signals if sid in already_classified_ids])
         total_conflicts = len(conflicting_signals)
-        st.info(f"📈 Conflict signals reviewed: {num_reviewed} / {total_conflicts}")
+        st.info(f"Conflict signals reviewed: {num_reviewed} / {total_conflicts}")
     
         available_signals = [k for k in conflicting_signals if k not in already_classified_ids]
 
@@ -229,8 +216,7 @@ else:
     if available_signals:
         
         signal_id = available_signals[0]
-        st.subheader(f"Signal ID: {signal_id}")
-        # st.line_chart(ecgs[signal_id])
+        # st.subheader(f"Signal ID: {signal_id}")
 
         def show_ecg_plotttt(signal, sampling_frequency=300, signal_id=None, duration=30):
             signal = np.array(signal, dtype=float)
@@ -278,12 +264,6 @@ else:
                     ax.set_xlabel("Tempo (s)")
                 if i == 1:
                     ax.set_ylabel("ECG (μV)")
-        
-                # Grade vermelha (padrão 1 mm e 5 mm)
-                # for j in np.arange(0, 10, 0.2):  # 5 mm = 0.2s
-                #     ax.axvline(j, color='red', linewidth=0.5, alpha=0.3)
-                # for j in np.arange(0, 10, 0.04):  # 1 mm = 0.04s
-                #     ax.axvline(j, color='red', linewidth=0.5, alpha=0.1)
 
                 for j in np.arange(i * 10, (i + 1) * 10, 0.2):  # vertical grid lines (5mm = 0.2s)
                     ax.axvline(j, color='red', linewidth=0.5, alpha=0.3)
@@ -365,16 +345,7 @@ else:
             ax.set_yticks(np.arange(-200, 550, 100))
         
             # Layout e exibição
-            plt.tight_layout()
-
-
-            # Save to buffer and display as image for best quality
-            # buf = io.BytesIO()
-            # fig.savefig(buf, format="png", dpi=dpi, bbox_inches='tight')
-            # buf.seek(0)
-            # st.image(buf, caption="ECG Signal", use_column_width=True)
-
-    
+            plt.tight_layout()  
             st.pyplot(fig)
 
         try:
@@ -382,6 +353,7 @@ else:
             # show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
             st.write(f"Heart Rate: {heart_rate} bpm")
+            
         except Exception as e:
             st.error(f"Erro ao carregar sinal {signal_id}: {e}")
             st.stop()
