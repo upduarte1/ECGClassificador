@@ -355,15 +355,22 @@ else:
             show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
             row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
             st.markdown("### Signal Features:")
+            # Garantir formatação
+            date_only = row_info["date"]
+            if isinstance(date_only, str):
+                date_only = date_only.split()[0]  # caso venha com hora em string
+            elif isinstance(date_only, datetime):
+                date_only = date_only.date().isoformat()
+            
             st.markdown(f"""
-            - **Data:** {row_info["date"]}
+            - **Data:** {date_only}
             - **Frequência Cardíaca:** {row_info["heart_rate"]} bpm
             - **Número de Batimentos:** {row_info["num_beats"]}
-            - **Média de BPM:** {row_info["mean_bpm"]}
-            - **SDNN:** {row_info["sdnn"]}
-            - **RMSSD:** {row_info["rmssd"]}
-            - **Entropia de Aproximação (ApEn):** {row_info["ap_entropy"]}
-            - **Índice SNR:** {row_info["snr_index"]}
+            - **Média de BPM:** {int(round(row_info["mean_bpm"]))}
+            - **SDNN:** {round(row_info["sdnn"], 2)}
+            - **RMSSD:** {round(row_info["rmssd"], 2)}
+            - **Entropia de Aproximação (ApEn):** {round(row_info["ap_entropy"], 2)}
+            - **Índice SNR:** {round(row_info["snr_index"], 2)}
             """)
             
         except Exception as e:
