@@ -231,14 +231,14 @@ else:
                 date_only = date_only.date().isoformat()
             
             st.markdown(f"""
-                **Data:** {date_only}
-                **Mean Heart Rate (withings):** {row_info["heart_rate"]} bpm
-                **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))} bpm
-                **Number of Beats:** {row_info["num_beats"]}
-                **SDNN:** {round(row_info["sdnn"], 2)} s
-                **RMSSD:** {round(row_info["rmssd"], 2)} s
-                **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
-                **SNR Index:** {round(row_info["snr_index"], 2)}
+                - **Date:** {date_only}
+                - **Mean Heart Rate (wearable):** {row_info["heart_rate"]} bpm
+                - **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))} bpm
+                - **Number of Beats:** {row_info["num_beats"]}
+                - **SDNN:** {round(row_info["sdnn"], 2)} s
+                - **RMSSD:** {round(row_info["rmssd"], 2)} s
+                - **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
+                - **SNR Index:** {round(row_info["snr_index"], 2)}
             """)
             
         except Exception as e:
@@ -254,25 +254,10 @@ else:
             st.session_state.temp_label = None
         if "temp_comment" not in st.session_state:
             st.session_state.temp_comment = ""
-
-        green_button_style = """
-            <style>
-            .green-button > button {
-                border: 2px solid green;
-                color: black;
-                font-weight: bold;
-            }
-            </style>
-        """
         
         with col1:
-            st.markdown(green_button_style, unsafe_allow_html=True)
-            # Envolve o botão com a classe CSS
-            with st.container():
-                if st.markdown('<div class="green-button">' + st.button("Fibrillation", key="fibril") * "</div>", unsafe_allow_html=True):
-                    select_label("Fibrillation")
-            #if st.button("⚠️ Fibrillation"):
-             #   select_label("Fibrillation")
+            if st.button("⚠️ Fibrillation"):
+               select_label("Fibrillation")
         with col2:
             if st.button("✅ Normal"):
                 select_label("Normal")
@@ -302,5 +287,5 @@ else:
                 st.session_state.temp_comment = ""
                 st.rerun()
     else:
-        st.info("🎉 You have classified all available signals! Thank you!")
         
+        st.info("You have classified all available signals! Thank you!")
