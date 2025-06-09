@@ -51,7 +51,7 @@ if not st.session_state.authenticated:
 
 # Main app after login
 else:
-
+    
     # Upload manual do Excel de sinais
     if "ecg_signals" not in st.session_state:
         st.session_state.ecg_signals = None
@@ -60,23 +60,25 @@ else:
     uploaded_file = st.file_uploader("Load the ECG signals file (.xlsx)", type=["xlsx"])
     
     if uploaded_file is not None:
+        
         try:
             df = pd.read_excel(uploaded_file)
             st.session_state.ecg_signals = df
             st.success("File loaded with success!")
+            
         except Exception as e:
             st.error(f"Error loading ECG file: {e}")
             st.stop()
+            
     if st.session_state.ecg_signals is None:
         st.warning("Please, load the excel file with the ECGs to continue.")
         st.stop()
     
     df_ecg = st.session_state.ecg_signals
-    # required_columns = {"signal_id", "ecg_signal", "heart_rate"}
     required_columns = {"signal_id", "ecg_signal", "heart_rate", "date", "num_beats", "mean_bpm", "sdnn", "rmssd", "ap_entropy", "snr_index"}
     
     if not required_columns.issubset(df_ecg.columns):
-        st.error("Excel file should have the following columns: 'signal_id', 'ecg_signal' e 'heart_rate'")
+        st.error("Excel file should have the following columns: 'signal_id', 'ecg_signal', 'heart_rate', 'date', 'num_beats', 'mean_bpm', 'sdnn', 'rmssd', 'ap_entropy', 'snr_index'")
         st.stop()
     
     all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
@@ -97,11 +99,9 @@ else:
         row = df_ecg[df_ecg["signal_id"] == signal_id]
         if row.empty:
             raise ValueError(f"Signal with ID {signal_id} not found.")
-        
         ecg_str = row.iloc[0]["ecg_signal"]
         heart_rate = float(row.iloc[0]["heart_rate"])
         values = [float(v.strip()) for v in str(ecg_str).split(",") if v.strip() not in ("", "-")]
-    
         return values, heart_rate
 
     # Connect to Google Sheets
@@ -110,64 +110,20 @@ else:
         credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
         credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
         client = gspread.authorize(credentials)
-
         classification_sheet = client.open("ECG Classificações").worksheet("Folha1")
-        # signal_sheet = client.open("ecg").worksheet("Folha1")
         return classification_sheet
-    
-    @st.cache_data(ttl=600)
-    def load_signals_from_google_sheets():
-        scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
-        client = gspread.authorize(credentials)
-    
-        sheet = client.open("ecg").worksheet("Folha1")
-        records = sheet.get_all_records()
-    
-        ecgs = {}
-        heart_rates = {}
-    
-        for row in records:
-            try:
-                signal_id = int(row["signal_id"])
-                heart_rate = float(row["heart_rate"])
-                ecg_str = row["ecg_signal"]
-    
-                values = []
-                for v in ecg_str.split(","):
-                    v = v.strip()
-                    if v == "-" or v == "":
-                        continue
-                    values.append(float(v))
-    
-                if values:
-                    ecgs[signal_id] = values
-                    heart_rates[signal_id] = heart_rate
-    
-            except Exception as e:
-                st.warning(f"Error processing signal {row.get('signal_id', '?')}: {e}")
-    
-        return ecgs, heart_rates
 
     # Connect and load data
     classification_sheet = connect_sheets()
-    # ecgs, heart_rates = load_signals(signal_sheet)
-    # ecgs, heart_rates = load_signals_from_google_sheets()
-    # signal_ids_sheet = signal_sheet.get_all_records()
-    # all_signal_ids = [int(row["signal_id"]) for row in signal_ids_sheet]
-
     if st.session_state.ecg_signals is None:
         st.warning("Please, load the ECG file to continue.")
         st.stop()
-    
     df_ecg = st.session_state.ecg_signals
     if "signal_id" not in df_ecg.columns or "ecg_signal" not in df_ecg.columns or "heart_rate" not in df_ecg.columns:
         st.error("The file should contain the columns: signal_id, ecg_signal, heart_rate")
         st.stop()
-    
     all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
-
+    
     # Load all classification records here
     records = classification_sheet.get_all_records()
     
@@ -175,15 +131,10 @@ else:
     if role == "classifier":
         
         already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
-
         available_signals = [sid for sid in all_signal_ids if sid not in already_classified_ids]
         total_signals = len(all_signal_ids)
-        
         num_classified = len(already_classified_ids)
         st.info(f"Signals classified: {num_classified} / {total_signals}")
-      
-        progress_ratio = num_classified / total_signals
-        st.progress(progress_ratio)
     
     elif role == "reviewer":
         
@@ -192,24 +143,23 @@ else:
             sid = r["signal_id"]
             doctor = r["cardiologist"]
             label = r["classification"]
-    
             if sid not in conflicts:
                 conflicts[sid] = {}
             conflicts[sid][doctor] = label
-    
+        
         conflicting_signals = [
             sid for sid, votes in conflicts.items()
             if "user1" in votes and "user2" in votes and votes["user1"] != votes["user2"]
         ]
-    
+        
         already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
         num_reviewed = len([sid for sid in conflicting_signals if sid in already_classified_ids])
         total_conflicts = len(conflicting_signals)
         st.info(f"Conflict signals reviewed: {num_reviewed} / {total_conflicts}")
-    
         available_signals = [k for k in conflicting_signals if k not in already_classified_ids]
 
     else:
+        
         st.error("Unknown user role. Please contact administrator.")
         st.stop()
 
@@ -217,164 +167,82 @@ else:
     if available_signals:
         
         signal_id = available_signals[0]
-        # st.subheader(f"Signal ID: {signal_id}")
 
-        def show_ecg_plotttt(signal, sampling_frequency=300, signal_id=None, duration=30):
+        def show_ecg_plot(signal, sampling_frequency=300, signal_id=None, duration=30):
             signal = np.array(signal, dtype=float)
             signal = signal[np.isfinite(signal)]
-        
             if len(signal) == 0:
                 st.warning(f"ECG signal ID {signal_id} is empty or invalid.")
                 return
-        
-            # Truncar o sinal para o tempo desejado
             samples_to_show = int(duration * sampling_frequency)
             signal = signal[:samples_to_show]
-        
             # Escala: 25 mm/s → ≈ 0.984 inch/s, para 10 segundos → ~9.84 inches
             mm_per_second = 25
             dpi = 300
             inches_per_second = mm_per_second / 25.4
             width_in_inches = 10 * inches_per_second  # Cada faixa = 10s
-            height_in_inches = 2  # Altura de cada faixa
-        
-            # Criar subplots (3 faixas de 10 segundos)
+            height_in_inches = 2  # Altura de cada faixa        
             fig, axs = plt.subplots(3, 1, figsize=(width_in_inches, height_in_inches * 3), dpi=dpi, sharey=True)
-        
             for i in range(3):
                 start = i * 10 * sampling_frequency
                 end = (i + 1) * 10 * sampling_frequency
                 s_segment = signal[start:end]
                 t_segment = np.arange(len(s_segment)) / sampling_frequency
-
                 ax = axs[i]
                 ax.plot(t_segment + i * 10, s_segment, color='black', linewidth=0.8)
                 ax.set_xlim([0, 10])
                 ax.set_xlim([i * 10, (i + 1) * 10])
-                ax.set_ylim([-1500, 1500])
-                
-                ax.set_facecolor("white")
-        
-                # Ticks e rótulos
+                ax.set_ylim([-1500, 1500])                
+                ax.set_facecolor("white")        
                 ax.set_xticks(np.arange(i * 10, (i + 1) * 10 + 1, 1))
                 ax.set_yticks(np.arange(-1500, 1601, 500))
-
                 ax.set_yticklabels([])
-        
                 if i == 2:
                     ax.set_xlabel("Tempo (s)")
                 if i == 1:
                     ax.set_ylabel("ECG (μV)")
-
                 for j in np.arange(i * 10, (i + 1) * 10, 0.2):  # vertical grid lines (5mm = 0.2s)
                     ax.axvline(j, color='red', linewidth=0.5, alpha=0.3)
                 for j in np.arange(i * 10, (i + 1) * 10, 0.04):  # vertical grid lines (1mm = 0.04s)
                     ax.axvline(j, color='red', linewidth=0.5, alpha=0.1)
-        
                 for j in np.arange(-1500, 1600, 500):  # 5 mm = 0.5 mV = 500 μV
                     ax.axhline(j, color='red', linewidth=0.5, alpha=0.3)
                 for j in np.arange(-1500, 1600, 100):  # 1 mm = 0.1 mV = 100 μV
                     ax.axhline(j, color='red', linewidth=0.5, alpha=0.1)
-        
             fig.suptitle(f"ECG Signal ID {signal_id}" if signal_id else "ECG Signal", fontsize=14)
             plt.tight_layout()
-        
             # Mostrar imagem com qualidade ideal
             buf = io.BytesIO()
             fig.savefig(buf, format="png", dpi=dpi, bbox_inches='tight')
             buf.seek(0)
             st.image(buf, use_container_width=True)
 
-
-        def show_ecg_plot(signal, sampling_frequency=300, signal_id=None):
-        
-            signal = np.array(signal, dtype=float)
-            signal = signal[np.isfinite(signal)]
-        
-            if len(signal) == 0:
-                st.warning(f"ECG signal ID {signal_id} is empty or invalid.")
-                return
-                        
-            t = np.arange(len(signal)) / sampling_frequency
-            duration = 30
-            samples_to_show = int(duration * sampling_frequency)
-            t = t[:samples_to_show]
-            signal = signal[:samples_to_show]
-        
-            # Criar figura e eixos
-            # fig, ax = plt.subplots(figsize=(30, 6), dpi=100)
-            # 25 mm/s scaling:
-            # At 100 dpi, 1 inch = 25.4 mm → 25 mm = 0.984 inches per second
-            # 30 seconds → ~29.5 inches width
-            seconds = 30
-            mm_per_second = 25
-            dpi = 100
-            inches_per_second = mm_per_second / 25.4  # ≈ 0.984
-        
-            width_in_inches = seconds * inches_per_second  # ~29.5
-            height_in_inches = 6  # You can adjust for aesthetics
-        
-            fig, ax = plt.subplots(figsize=(width_in_inches, height_in_inches), dpi=300)
-
-
-            ax.set_facecolor("white")
-        
-            # Limites e rótulos
-            ax.set_xlim([0, 30])
-            ax.set_ylim([-200, 500])
-            ax.set_xlabel("Time (s)")
-            ax.set_ylabel("ECG (μV)")
-            ax.set_title(f"ECG Signal ID {signal_id}" if signal_id else "ECG Signal")
-        
-            # Grade vermelha vertical (tempo)
-            for i in np.arange(0, 30, 0.2):  # 5 mm = 0.2s
-                ax.axvline(i, color='red', linewidth=0.5, alpha=0.3)
-            for i in np.arange(0, 30, 0.04):  # 1 mm = 0.04s
-                ax.axvline(i, color='red', linewidth=0.5, alpha=0.1)
-        
-            # Grade vermelha horizontal (amplitude)
-            for i in np.arange(-200, 500, 50):  # 5 mm = 0.5mV ~ 50μV
-                ax.axhline(i, color='red', linewidth=0.5, alpha=0.3)
-            for i in np.arange(-200, 500, 10):  # 1 mm = 0.1mV ~ 10μV
-                ax.axhline(i, color='red', linewidth=0.5, alpha=0.1)
-        
-            # Plotar sinal
-            ax.plot(t, signal, color='black', linewidth=0.8)
-        
-            # Ticks
-            ax.set_xticks(np.arange(0, 30.1, 2.5))
-            ax.set_yticks(np.arange(-200, 550, 100))
-        
-            # Layout e exibição
-            plt.tight_layout()  
-            st.pyplot(fig)
-
         try:
+            
             signal_data, heart_rate = get_signal_by_id(signal_id)
-            # show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
-            show_ecg_plotttt(signal_data, sampling_frequency=300, signal_id=signal_id)
+            show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
             st.markdown("### Signal Features")
-            # Garantir formatação
+            
             date_only = row_info["date"]
             if isinstance(date_only, str):
-                date_only = date_only.split()[0]  # caso venha com hora em string
+                date_only = date_only.split()[0]
             elif isinstance(date_only, datetime):
                 date_only = date_only.date().isoformat()
             
             st.markdown(f"""
-            - **Data:** {date_only}
-            - **Mean Heart Rate (withings):** {row_info["heart_rate"]} bpm
-            - **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))} bpm
-            - **Number of Beats:** {row_info["num_beats"]}
-            - **SDNN:** {round(row_info["sdnn"], 2)} s
-            - **RMSSD:** {round(row_info["rmssd"], 2)} s
-            - **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
-            - **SNR Index:** {round(row_info["snr_index"], 2)}
+                **Data:** {date_only}
+                **Mean Heart Rate (withings):** {row_info["heart_rate"]} bpm
+                **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))} bpm
+                **Number of Beats:** {row_info["num_beats"]}
+                **SDNN:** {round(row_info["sdnn"], 2)} s
+                **RMSSD:** {round(row_info["rmssd"], 2)} s
+                **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
+                **SNR Index:** {round(row_info["snr_index"], 2)}
             """)
             
         except Exception as e:
-            st.error(f"Erro ao carregar sinal {signal_id}: {e}")
+            st.error(f"Error loading ECG signal {signal_id}: {e}")
             st.stop()
 
         col1, col2, col3, col4 = st.columns(4)
@@ -387,9 +255,24 @@ else:
         if "temp_comment" not in st.session_state:
             st.session_state.temp_comment = ""
 
+        green_button_style = """
+            <style>
+            .green-button > button {
+                border: 2px solid green;
+                color: black;
+                font-weight: bold;
+            }
+            </style>
+        """
+        
         with col1:
-            if st.button("⚠️ Fibrillation"):
-                select_label("Fibrillation")
+            st.markdown(green_button_style, unsafe_allow_html=True)
+            # Envolve o botão com a classe CSS
+            with st.container():
+                if st.markdown('<div class="green-button">' + st.button("Fibrillation", key="fibril") * "</div>", unsafe_allow_html=True):
+                    select_label("Fibrillation")
+            #if st.button("⚠️ Fibrillation"):
+             #   select_label("Fibrillation")
         with col2:
             if st.button("✅ Normal"):
                 select_label("Normal")
