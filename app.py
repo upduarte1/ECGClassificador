@@ -222,24 +222,24 @@ else:
             signal_data, heart_rate = get_signal_by_id(signal_id)
             show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
-            st.markdown("### Signal Features")
+            #st.markdown("### Signal Features")
             
-            date_only = row_info["date"]
-            if isinstance(date_only, str):
-                date_only = date_only.split()[0]
-            elif isinstance(date_only, datetime):
-                date_only = date_only.date().isoformat()
+            #date_only = row_info["date"]
+            #if isinstance(date_only, str):
+            #    date_only = date_only.split()[0]
+            #elif isinstance(date_only, datetime):
+            #    date_only = date_only.date().isoformat()
             
-            st.markdown(f"""
-                - **Date:** {date_only}
-                - **Mean Heart Rate (wearable):** {row_info["heart_rate"]} bpm
-                - **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))} bpm
-                - **Number of Beats:** {row_info["num_beats"]}
-                - **SDNN:** {round(row_info["sdnn"] * 1000, 2)} ms
-                - **RMSSD:** {round(row_info["rmssd"] * 1000, 2)} ms
-                - **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
-                - **SNR Index:** {round(row_info["snr_index"], 2)}
-            """)
+            #st.markdown(f"""
+            #    - **Date:** {date_only}
+            #    - **Mean Heart Rate (wearable):** {row_info["heart_rate"]} bpm
+            #    - **Mean Heart Rate (peak detector):** {int(round(row_info["mean_bpm"]))} bpm
+            #    - **Number of Beats:** {row_info["num_beats"]}
+            #    - **SDNN:** {round(row_info["sdnn"] * 1000, 2)} ms
+            #    - **RMSSD:** {round(row_info["rmssd"] * 1000, 2)} ms
+            #    - **Approximation Entropy:** {round(row_info["ap_entropy"], 2)}
+            #    - **SNR Index:** {round(row_info["snr_index"], 2)}
+            #""")
             
         except Exception as e:
             st.error(f"Error loading ECG signal {signal_id}: {e}")
