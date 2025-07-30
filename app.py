@@ -16,9 +16,9 @@ if "username" not in st.session_state:
 
 # Authorized users
 USERS = {
-    "user1": "1234",
-    "user2": "1234",
-    "user3": "1234"
+    "user1": "2901",
+    "user2": "2901",
+    "user3": "2901"
 }
 
 # User roles
