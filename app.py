@@ -245,7 +245,7 @@ else:
             st.error(f"Error loading ECG signal {signal_id}: {e}")
             st.stop()
 
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)
         
         def select_label(label):
             st.session_state.temp_label = label
@@ -261,12 +261,12 @@ else:
         with col2:
             if st.button("✅ Normal"):
                 select_label("Normal")
+        #with col3:
+        #    if st.button("⚡ Noisy"):
+        #        select_label("Noisy")
         with col3:
-            if st.button("⚡ Noisy"):
-                select_label("Noisy")
-        with col4:
-            if st.button("❓ Other"):
-                select_label("Other")
+            if st.button("❓ Inconclusive"):
+                select_label("Inconclusive")
 
         if st.session_state.temp_label:
             
