@@ -28,7 +28,7 @@ USERS = {
 ROLES = {
     "user1": "classifier",
     "user2": "classifier",
-    "user3": "reviewer"
+    "user3": "classifier"
 }
 
 # Login
