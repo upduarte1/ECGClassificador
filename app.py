@@ -131,6 +131,39 @@ else:
     assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
     assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
 
+    # =====================================================
+    # 🧩 DEBUG SECTION — Show all assigned signals to user
+    # =====================================================
+
+    st.markdown("---")
+    st.markdown(f"### 🔍 Debug Info — Assigned Signals for **{username}**")
+
+    # Informação geral
+    st.write(f"**Total signals assigned:** {len(assigned_signal_ids)}")
+    st.write(f"**Assigned index range:** {min(assigned_indices)} → {max(assigned_indices)}")
+
+    # Criar tabela com colunas úteis
+    debug_df = assigned_df[["index_id", "SignalID", "HeartRate", "Afib", "Samples"]].sort_values(by="index_id")
+
+    # Mostrar tabela completa sem truncar
+    st.dataframe(
+        debug_df.style.format({
+            "index_id": "{:d}",
+            "SignalID": "{:d}",
+            "HeartRate": "{:.0f}",
+            "Afib": "{:.0f}",
+            "Samples": "{:.0f}"
+        }),
+        use_container_width=True,
+        height=600  # podes aumentar ou diminuir
+    )
+
+    # Mostrar também todos os IDs numa linha, se quiseres copiar facilmente
+    st.markdown("**All assigned SignalIDs (comma-separated):**")
+    all_ids_text = ", ".join(map(str, assigned_signal_ids))
+    st.text_area("IDs", all_ids_text, height=150)
+
+
     # Select signals based on user role
     if role == "classifier":
 
