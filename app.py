@@ -1,6 +1,8 @@
 import streamlit as st
 import gspread
 from plotting import show_ecg_plot
+from extracting import get_signal_by_id
+from connecting import connect_sheets
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
@@ -96,24 +98,6 @@ else:
 
     st.title("ECG Signal Classifier")
 
-    def get_signal_by_id(signal_id: int):
-        row = df_ecg[df_ecg["signal_id"] == signal_id]
-        if row.empty:
-            raise ValueError(f"Signal with ID {signal_id} not found.")
-        ecg_str = row.iloc[0]["ecg_signal"]
-        heart_rate = float(row.iloc[0]["heart_rate"])
-        values = [float(v.strip()) for v in str(ecg_str).split(",") if v.strip() not in ("", "-")]
-        return values, heart_rate
-
-    # Connect to Google Sheets
-    def connect_sheets():
-        scopes = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        credentials = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes)
-        client = gspread.authorize(credentials)
-        classification_sheet = client.open("ECG Classificações").worksheet("Folha1")
-        return classification_sheet
-
     # Connect and load data
     classification_sheet = connect_sheets()
     if st.session_state.ecg_signals is None:
@@ -208,16 +192,16 @@ else:
             st.session_state.temp_comment = ""
         
         with col1:
-            if st.button("⚠️ Fibrillation"):
+            if st.button("Fibrillation"):
                select_label("Fibrillation")
         with col2:
-            if st.button("✅ Normal"):
+            if st.button("Normal"):
                 select_label("Normal")
         #with col3:
         #    if st.button("⚡ Noisy"):
         #        select_label("Noisy")
         with col3:
-            if st.button("❓ Inconclusive"):
+            if st.button("Inconclusive"):
                 select_label("Inconclusive")
 
         if st.session_state.temp_label:
