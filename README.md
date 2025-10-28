@@ -1,1 +1,3 @@
-# ecg-classificador
+## ECG Classifier
+
+### Functions
