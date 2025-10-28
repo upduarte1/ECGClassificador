@@ -59,13 +59,13 @@ else:
     if "ecg_signals" not in st.session_state:
         st.session_state.ecg_signals = None
     
-    st.subheader("📥 Upload ECGs File")
-    uploaded_file = st.file_uploader("Load the ECG signals file (.xlsx)", type=["xlsx"])
+    st.subheader("Upload ECGs File")
+    uploaded_file = st.file_uploader("Load the ECG signals file (.csv)", type=["csv"])
     
     if uploaded_file is not None:
         
         try:
-            df = pd.read_excel(uploaded_file)
+            df = pd.read_csv(uploaded_file)
             st.session_state.ecg_signals = df
             st.success("File loaded with success!")
             
@@ -74,18 +74,18 @@ else:
             st.stop()
             
     if st.session_state.ecg_signals is None:
-        st.warning("Please, load the excel file with the ECGs to continue.")
+        st.warning("Please, load the CSV file with the ECGs to continue.")
         st.stop()
     
     df_ecg = st.session_state.ecg_signals
-    required_columns = {"signal_id", "ecg_signal", "heart_rate", "date", "num_beats", "mean_bpm", "sdnn", "rmssd", "ap_entropy", "snr_index"}
+    required_columns = {"SignalID", "HeartRate", "Afib", "Samples", "ECGSignal"}
     
     if not required_columns.issubset(df_ecg.columns):
-        st.error("Excel file should have the following columns: 'signal_id', 'ecg_signal', 'heart_rate', 'date', 'num_beats', 'mean_bpm', 'sdnn', 'rmssd', 'ap_entropy', 'snr_index'")
+        st.error("CSV file should have the following columns: 'SignalID', 'HeartRate', 'Afib', 'Samples', 'ECGSignal'")
         st.stop()
-    
-    all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
-    
+
+    all_signal_ids = df_ecg["SignalID"].astype(int).tolist()
+
     username = st.session_state.username
     user_display_name = username.title()
     st.sidebar.success(f"Welcome, Dr. {user_display_name}")
@@ -103,21 +103,40 @@ else:
     if st.session_state.ecg_signals is None:
         st.warning("Please, load the ECG file to continue.")
         st.stop()
-    df_ecg = st.session_state.ecg_signals
-    if "signal_id" not in df_ecg.columns or "ecg_signal" not in df_ecg.columns or "heart_rate" not in df_ecg.columns:
-        st.error("The file should contain the columns: signal_id, ecg_signal, heart_rate")
+    
+    if not {"SignalID", "ECGSignal", "HeartRate"}.issubset(df_ecg.columns):
+        st.error("The file should contain the columns: SignalID, ECGSignal, HeartRate")
         st.stop()
-    all_signal_ids = df_ecg["signal_id"].astype(int).tolist()
+    all_signal_ids = df_ecg["SignalID"].astype(int).tolist()
     
     # Load all classification records here
     records = classification_sheet.get_all_records()
+
+    df_ecg = df_ecg.reset_index(drop=True)
+    df_ecg["index_id"] = df_ecg.index + 1
+    A = range(1, 501)
+    B = range(501, 1001)
+    C = range(1001, 1501)
+
+    if username == "user1":
+        assigned_indices = list(A) + list(B)
+    elif username == "user2":
+        assigned_indices = list(B) + list(C)
+    elif username == "user3":
+        assigned_indices = list(A) + list(C)
+    else:
+        st.error("Unknown user. Please contact administrator.")
+        st.stop()
     
+    assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
+    assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
+
     # Select signals based on user role
     if role == "classifier":
-        
-        already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
-        available_signals = [sid for sid in all_signal_ids if sid not in already_classified_ids]
-        total_signals = len(all_signal_ids)
+
+        already_classified_ids = {r['SignalID'] for r in records if r['cardiologist'] == username}
+        available_signals = [sid for sid in assigned_signal_ids if sid not in already_classified_ids]
+        total_signals = len(assigned_signal_ids)
         num_classified = len(already_classified_ids)
         st.info(f"Signals classified: {num_classified} / {total_signals}")
     
@@ -125,7 +144,7 @@ else:
         
         conflicts = {}
         for r in records:
-            sid = r["signal_id"]
+            sid = r["SignalID"]
             doctor = r["cardiologist"]
             label = r["classification"]
             if sid not in conflicts:
@@ -137,7 +156,7 @@ else:
             if "user1" in votes and "user2" in votes and votes["user1"] != votes["user2"]
         ]
         
-        already_classified_ids = {r['signal_id'] for r in records if r['cardiologist'] == username}
+        already_classified_ids = {r['SignalID'] for r in records if r['cardiologist'] == username}
         num_reviewed = len([sid for sid in conflicting_signals if sid in already_classified_ids])
         total_conflicts = len(conflicting_signals)
         st.info(f"Conflict signals reviewed: {num_reviewed} / {total_conflicts}")
@@ -157,7 +176,7 @@ else:
             
             signal_data, heart_rate = get_signal_by_id(signal_id, df_ecg)
             show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
-            row_info = df_ecg[df_ecg["signal_id"] == signal_id].iloc[0]
+            row_info = df_ecg[df_ecg["SignalID"] == signal_id].iloc[0]
             
         except Exception as e:
             st.error(f"Error loading ECG signal {signal_id}: {e}")
