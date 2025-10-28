@@ -1,6 +1,6 @@
 import streamlit as st
 import gspread
-from plotting.py import show_ecg_plot
+from plotting import show_ecg_plot
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
