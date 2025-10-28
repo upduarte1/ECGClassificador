@@ -1,3 +1,5 @@
+import numpy as np
+
 def show_ecg_plot(signal, sampling_frequency=300, signal_id=None, duration=30):
   
   signal = np.array(signal, dtype=float)
