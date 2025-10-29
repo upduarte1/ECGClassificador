@@ -19,9 +19,9 @@ if "username" not in st.session_state:
 
 # Authorized users
 USERS = {
-    "user1": "2901",
+    "user1": "3759",
     "user2": "2901",
-    "user3": "2901"
+    "user3": "5178"
 }
 
 # User roles
@@ -55,11 +55,12 @@ if not st.session_state.authenticated:
 # Main app after login
 else:
     
-    # Upload manual do Excel de sinais
+    # Upload CSV file with ECG signals
     if "ecg_signals" not in st.session_state:
         st.session_state.ecg_signals = None
     
     st.subheader("Upload ECGs File")
+
     uploaded_file = st.file_uploader("Load the ECG signals file (.csv)", type=["csv"])
     
     if uploaded_file is not None:
@@ -78,6 +79,7 @@ else:
         st.stop()
     
     df_ecg = st.session_state.ecg_signals
+
     required_columns = {"SignalID", "HeartRate", "Afib", "Samples", "ECGSignal"}
     
     if not required_columns.issubset(df_ecg.columns):
@@ -87,8 +89,11 @@ else:
     all_signal_ids = df_ecg["SignalID"].astype(int).tolist()
 
     username = st.session_state.username
+
     user_display_name = username.title()
+
     st.sidebar.success(f"Welcome, Dr. {user_display_name}")
+
     role = ROLES.get(username, "unknown")
 
     if st.sidebar.button("Logout"):
@@ -100,6 +105,7 @@ else:
 
     # Connect and load data
     classification_sheet = connect_sheets()
+
     if st.session_state.ecg_signals is None:
         st.warning("Please, load the ECG file to continue.")
         st.stop()
@@ -107,6 +113,7 @@ else:
     if not {"SignalID", "ECGSignal", "HeartRate"}.issubset(df_ecg.columns):
         st.error("The file should contain the columns: SignalID, ECGSignal, HeartRate")
         st.stop()
+
     all_signal_ids = df_ecg["SignalID"].astype(int).tolist()
     
     # Load all classification records here
@@ -114,6 +121,7 @@ else:
 
     df_ecg = df_ecg.reset_index(drop=True)
     df_ecg["index_id"] = df_ecg.index + 1
+    
     A = range(1, 501)
     B = range(501, 1001)
     C = range(1001, 1501)
