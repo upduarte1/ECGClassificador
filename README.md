@@ -17,7 +17,7 @@ This tool allows users to upload ECG signal data, review each signal, and classi
 ## File Structure
 
 ```
-app.py              # Main Streamlit application
+app.py               # Main Streamlit application
 connecting.py        # Google Sheets connection
 extracting.py        # ECG signal extraction
 plotting.py          # ECG plotting function
