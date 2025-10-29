@@ -141,7 +141,6 @@ else:
 
     # Select signals based on user role
     if role == "classifier":
-
         already_classified_ids = {r['SignalID'] for r in records if r['cardiologist'] == username}
         available_signals = [sid for sid in assigned_signal_ids if sid not in already_classified_ids]
         total_signals = len(assigned_signal_ids)
@@ -149,7 +148,6 @@ else:
         st.info(f"Signals classified: {num_classified} / {total_signals}")
     
     elif role == "reviewer":
-        
         conflicts = {}
         for r in records:
             sid = r["SignalID"]
@@ -158,12 +156,10 @@ else:
             if sid not in conflicts:
                 conflicts[sid] = {}
             conflicts[sid][doctor] = label
-        
         conflicting_signals = [
             sid for sid, votes in conflicts.items()
             if "user1" in votes and "user2" in votes and votes["user1"] != votes["user2"]
         ]
-        
         already_classified_ids = {r['SignalID'] for r in records if r['cardiologist'] == username}
         num_reviewed = len([sid for sid in conflicting_signals if sid in already_classified_ids])
         total_conflicts = len(conflicting_signals)
@@ -171,7 +167,6 @@ else:
         available_signals = [k for k in conflicting_signals if k not in already_classified_ids]
 
     else:
-        
         st.error("Unknown user role. Please contact administrator.")
         st.stop()
 
@@ -181,7 +176,6 @@ else:
         signal_id = available_signals[0]
 
         try:
-            
             signal_data, heart_rate = get_signal_by_id(signal_id, df_ecg)
             show_ecg_plot(signal_data, sampling_frequency=300, signal_id=signal_id)
             row_info = df_ecg[df_ecg["SignalID"] == signal_id].iloc[0]
