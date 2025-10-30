@@ -80,10 +80,10 @@ else:
     
     df_ecg = st.session_state.ecg_signals
 
-    required_columns = {"SignalID", "HeartRate", "Afib", "Samples", "ECGSignal"}
+    required_columns = {"SignalID", "HeartRate", "ECGSignal"}
     
     if not required_columns.issubset(df_ecg.columns):
-        st.error("CSV file should have the following columns: 'SignalID', 'HeartRate', 'Afib', 'Samples', 'ECGSignal'")
+        st.error("CSV file should have the following columns: 'SignalID', 'HeartRate', 'ECGSignal'")
         st.stop()
 
     all_signal_ids = df_ecg["SignalID"].astype(int).tolist()
