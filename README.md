@@ -50,7 +50,7 @@ pip install -r requirements.txt
    streamlit run main.py
    ```
 
-4. Access the app in your browser (default: http://localhost:8501).  
+4. Access the app in your browser.  
 5. Log in using authorized credentials.  
 6. Upload the ECG CSV file and begin classification.
 
