@@ -107,6 +107,8 @@ else:
 
     # Connect and load data
     classification_sheet = connect_sheets()
+    st.write("Worksheet title:", classification_sheet.title)
+    st.write("All values preview:", classification_sheet.get_all_values()[:10])
 
     if st.session_state.ecg_signals is None:
         st.warning("Please, load the ECG file to continue.")
