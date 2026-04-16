@@ -127,7 +127,8 @@ else:
     A = range(1, 501)
     B = range(501, 1001)
     C = range(1001, 1501)
-
+    
+    assigned_indices = []
     assigned_signal_ids = []
 
     if username == "user1":
@@ -146,7 +147,7 @@ else:
         assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
         
     elif username == "user4":
-        pass  # reviewer não usa blocos
+        assigned_signal_ids = []
         
     else:
         st.error("Unknown user. Please contact administrator.")
