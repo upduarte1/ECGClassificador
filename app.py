@@ -206,6 +206,8 @@ else:
     # Show signal to classify
     if available_signals:
 
+        signal_id = available_signals[0]
+
         if role == "reviewer":
             previous_votes = [
                 r for r in records
@@ -215,8 +217,6 @@ else:
             st.markdown("### Previous classifications")
             for vote in previous_votes:
                 st.write(f"- **{vote['cardiologist']}**: {vote['classification']}")
-
-        signal_id = available_signals[0]
 
         try:
             signal_data, heart_rate = get_signal_by_id(signal_id, df_ecg)
