@@ -152,9 +152,6 @@ else:
     else:
         st.error("Unknown user. Please contact administrator.")
         st.stop()
-    
-    # assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
-    # assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
 
     # Select signals based on user role
     if role == "classifier":
@@ -171,22 +168,18 @@ else:
             raw_sid = r.get("SignalID", None)
             doctor = r.get("cardiologist", "")
             label = r.get("classification", "")
-            if raw_sid in [None, ""]:
+            if raw_sid in [None, ""] or doctor not in primary_classifiers or label in [None, ""]:
                 continue
             try:
                 sid = int(raw_sid)
             except (ValueError, TypeError):
                 continue
-            if doctor in primary_classifiers:
-                if sid not in votes_per_signal:
-                    votes_per_signal[sid] = {}
-                votes_per_signal[sid][doctor] = label
+            if sid not in votes_per_signal:
+                votes_per_signal[sid] = {}
+            votes_per_signal[sid][doctor] = label
         conflicting_signals = []
-        fully_reviewable_signals = []
         for sid, votes in votes_per_signal.items():
-            # só considerar sinais onde os 3 classificadores já votaram
-            if primary_classifiers.issubset(votes.keys()):
-                fully_reviewable_signals.append(sid)
+            if len(votes) == 2:
                 unique_labels = set(votes.values())
                 if len(unique_labels) > 1:
                     conflicting_signals.append(sid)
@@ -212,7 +205,17 @@ else:
 
     # Show signal to classify
     if available_signals:
-        
+
+        if role == "reviewer":
+            previous_votes = [
+                r for r in records
+                if str(r.get("SignalID", "")).strip() == str(signal_id)
+                and r.get("cardiologist") in {"user1", "user2", "user3"}
+            ]
+            st.markdown("### Previous classifications")
+            for vote in previous_votes:
+                st.write(f"- **{vote['cardiologist']}**: {vote['classification']}")
+
         signal_id = available_signals[0]
 
         try:
