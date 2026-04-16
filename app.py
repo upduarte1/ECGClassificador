@@ -107,23 +107,6 @@ else:
 
     # Connect and load data
     classification_sheet = connect_sheets()
-    st.write("Worksheet title:", classification_sheet.title)
-    st.write("All values preview:", classification_sheet.get_all_values()[:10])
-    all_values = classification_sheet.get_all_values()
-    st.write("Total rows in worksheet:", len(all_values))
-    st.write("First 15 rows:", all_values[:15])
-    st.write("Last 15 rows:", all_values[-15:])
-    records = classification_sheet.get_all_records()
-    st.write("Number of records read:", len(records))
-    st.write("First 5 records:", records[:5])
-    st.write("Last 5 records:", records[-5:])
-    all_values = classification_sheet.get_all_values()
-    first_nonempty_after_header = None
-    for i, row in enumerate(all_values[1:], start=2):  # linha real da sheet
-        if any(str(cell).strip() != "" for cell in row):
-            first_nonempty_after_header = i
-            break
-    st.write("First non-empty row after header:", first_nonempty_after_header)
 
     if st.session_state.ecg_signals is None:
         st.warning("Please, load the ECG file to continue.")
@@ -185,9 +168,15 @@ else:
         primary_classifiers = {"user1", "user2", "user3"}
         votes_per_signal = {}
         for r in records:
-            sid = int(r["SignalID"])
-            doctor = r["cardiologist"]
-            label = r["classification"]
+            raw_sid = r.get("SignalID", None)
+            doctor = r.get("cardiologist", "")
+            label = r.get("classification", "")
+            if raw_sid in [None, ""]:
+                continue
+            try:
+                sid = int(raw_sid)
+            except (ValueError, TypeError):
+                continue
             if doctor in primary_classifiers:
                 if sid not in votes_per_signal:
                     votes_per_signal[sid] = {}
@@ -201,9 +190,17 @@ else:
                 unique_labels = set(votes.values())
                 if len(unique_labels) > 1:
                     conflicting_signals.append(sid)
-        already_reviewed_ids = {
-            int(r["SignalID"]) for r in records if r["cardiologist"] == username
-        }
+        already_reviewed_ids = set()
+        for r in records:
+            if r.get("cardiologist") != username:
+                continue
+            raw_sid = r.get("SignalID", None)
+            if raw_sid in [None, ""]:
+                continue
+            try:
+                already_reviewed_ids.add(int(raw_sid))
+            except (ValueError, TypeError):
+                continue
         num_reviewed = len([sid for sid in conflicting_signals if sid in already_reviewed_ids])
         total_conflicts = len(conflicting_signals)
         st.info(f"Conflict signals reviewed: {num_reviewed} / {total_conflicts}")
