@@ -109,6 +109,21 @@ else:
     classification_sheet = connect_sheets()
     st.write("Worksheet title:", classification_sheet.title)
     st.write("All values preview:", classification_sheet.get_all_values()[:10])
+    all_values = classification_sheet.get_all_values()
+    st.write("Total rows in worksheet:", len(all_values))
+    st.write("First 15 rows:", all_values[:15])
+    st.write("Last 15 rows:", all_values[-15:])
+    records = classification_sheet.get_all_records()
+    st.write("Number of records read:", len(records))
+    st.write("First 5 records:", records[:5])
+    st.write("Last 5 records:", records[-5:])
+    all_values = classification_sheet.get_all_values()
+    first_nonempty_after_header = None
+    for i, row in enumerate(all_values[1:], start=2):  # linha real da sheet
+        if any(str(cell).strip() != "" for cell in row):
+            first_nonempty_after_header = i
+            break
+    st.write("First non-empty row after header:", first_nonempty_after_header)
 
     if st.session_state.ecg_signals is None:
         st.warning("Please, load the ECG file to continue.")
