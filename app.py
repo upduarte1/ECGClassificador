@@ -153,8 +153,8 @@ else:
         st.error("Unknown user. Please contact administrator.")
         st.stop()
     
-    assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
-    assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
+    # assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
+    # assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
 
     # Select signals based on user role
     if role == "classifier":
