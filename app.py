@@ -21,14 +21,16 @@ if "username" not in st.session_state:
 USERS = {
     "user1": "3759",
     "user2": "2901",
-    "user3": "5178"
+    "user3": "5178",
+    "user4": "3601"
 }
 
 # User roles
 ROLES = {
     "user1": "classifier",
     "user2": "classifier",
-    "user3": "classifier"
+    "user3": "classifier",
+    "user4": "reviewer",    
 }
 
 # Login
@@ -126,12 +128,26 @@ else:
     B = range(501, 1001)
     C = range(1001, 1501)
 
+    assigned_signal_ids = []
+
     if username == "user1":
         assigned_indices = list(A) + list(B)
+        assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
+        assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
+        
     elif username == "user2":
         assigned_indices = list(B) + list(C)
+        assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
+        assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
+        
     elif username == "user3":
         assigned_indices = list(A) + list(C)
+        assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
+        assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
+        
+    elif username == "user4":
+        pass  # reviewer não usa blocos
+        
     else:
         st.error("Unknown user. Please contact administrator.")
         st.stop()
@@ -148,23 +164,32 @@ else:
         st.info(f"Signals classified: {num_classified} / {total_signals}")
     
     elif role == "reviewer":
-        conflicts = {}
+        primary_classifiers = {"user1", "user2", "user3"}
+        votes_per_signal = {}
         for r in records:
-            sid = r["SignalID"]
+            sid = int(r["SignalID"])
             doctor = r["cardiologist"]
             label = r["classification"]
-            if sid not in conflicts:
-                conflicts[sid] = {}
-            conflicts[sid][doctor] = label
-        conflicting_signals = [
-            sid for sid, votes in conflicts.items()
-            if "user1" in votes and "user2" in votes and votes["user1"] != votes["user2"]
-        ]
-        already_classified_ids = {r['SignalID'] for r in records if r['cardiologist'] == username}
-        num_reviewed = len([sid for sid in conflicting_signals if sid in already_classified_ids])
+            if doctor in primary_classifiers:
+                if sid not in votes_per_signal:
+                    votes_per_signal[sid] = {}
+                votes_per_signal[sid][doctor] = label
+        conflicting_signals = []
+        fully_reviewable_signals = []
+        for sid, votes in votes_per_signal.items():
+            # só considerar sinais onde os 3 classificadores já votaram
+            if primary_classifiers.issubset(votes.keys()):
+                fully_reviewable_signals.append(sid)
+                unique_labels = set(votes.values())
+                if len(unique_labels) > 1:
+                    conflicting_signals.append(sid)
+        already_reviewed_ids = {
+            int(r["SignalID"]) for r in records if r["cardiologist"] == username
+        }
+        num_reviewed = len([sid for sid in conflicting_signals if sid in already_reviewed_ids])
         total_conflicts = len(conflicting_signals)
         st.info(f"Conflict signals reviewed: {num_reviewed} / {total_conflicts}")
-        available_signals = [k for k in conflicting_signals if k not in already_classified_ids]
+        available_signals = [sid for sid in conflicting_signals if sid not in already_reviewed_ids]
 
     else:
         st.error("Unknown user role. Please contact administrator.")
