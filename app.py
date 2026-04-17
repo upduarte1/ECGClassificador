@@ -208,15 +208,15 @@ else:
 
         signal_id = available_signals[0]
 
-        if role == "reviewer":
-            previous_votes = [
-                r for r in records
-                if str(r.get("SignalID", "")).strip() == str(signal_id)
-                and r.get("cardiologist") in {"user1", "user2", "user3"}
-            ]
-            st.markdown("### Previous classifications")
-            for vote in previous_votes:
-                st.write(f"- **{vote['cardiologist']}**: {vote['classification']}")
+        # if role == "reviewer":
+        #    previous_votes = [
+        #        r for r in records
+        #        if str(r.get("SignalID", "")).strip() == str(signal_id)
+        #        and r.get("cardiologist") in {"user1", "user2", "user3"}
+        #    ]
+        #    st.markdown("### Previous classifications")
+        #    for vote in previous_votes:
+        #        st.write(f"- **{vote['cardiologist']}**: {vote['classification']}")
 
         try:
             signal_data, heart_rate = get_signal_by_id(signal_id, df_ecg)
