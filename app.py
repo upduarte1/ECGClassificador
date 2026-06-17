@@ -30,7 +30,8 @@ ROLES = {
     "user1": "classifier",
     "user2": "classifier",
     "user3": "classifier",
-    "user4": "reviewer",    
+    "user4": "reviewer",
+    "test": "classifier",
 }
 
 # Login
@@ -143,6 +144,11 @@ else:
         
     elif username == "user3":
         assigned_indices = list(A) + list(C)
+        assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
+        assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
+
+    elif username == "test":
+        assigned_indices = list(A) + list(B) + list(C)
         assigned_df = df_ecg[df_ecg["index_id"].isin(assigned_indices)]
         assigned_signal_ids = assigned_df["SignalID"].astype(int).tolist()
         
