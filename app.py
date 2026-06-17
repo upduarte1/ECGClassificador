@@ -22,8 +22,8 @@ USERS = {
     "user1": "3759",
     "user2": "2901",
     "user3": "5178",
-    "test": "0000",
-    "user4": "3601"
+    "user4": "3601",
+    "test": "0000"
 }
 
 # User roles
